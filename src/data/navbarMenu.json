@@ -1,0 +1,17 @@
+[
+	{
+		"menu": [
+			{ "name": "Inicio", "src": "/" },
+			{ "name": "Acerca de", "src": "/acerca-de" },
+			{ "name": "Categorías", "src": "/" }
+		]
+	},
+	{
+		"dropdown": [
+			{ "name": "Belleza", "src": "/belleza" },
+			{ "name": "Ropa", "src": "/ropa" },
+			{ "name": "Joyería", "src": "/joyeria" },
+			{ "name": "Hogar", "src": "/hogar" }
+		]
+	}
+]

@@ -1,0 +1,39 @@
+---
+import Header from "../components/Header.astro";
+import Container from "../components/elements/Container.astro";
+type Props = {
+	title: string;
+	description: string;
+};
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<link
+			rel="icon"
+			type="image/x-icon"
+			href="/saris-favicon.png"
+		/>
+		<title>{title}</title>
+		<meta
+			name="description"
+			content={description}
+		/>
+	</head>
+	<body class="text-slate-500">
+		<Header />
+		<main>
+			<Container>
+				<slot />
+			</Container>
+		</main>
+	</body>
+</html>
