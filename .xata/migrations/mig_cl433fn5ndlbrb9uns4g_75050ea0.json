@@ -1,0 +1,13 @@
+{
+  "id": "mig_cl433fn5ndlbrb9uns4g",
+  "parentID": "mig_cl2mc940mi1nj31atct0",
+  "checksum": "1:75050ea054bd9388aedd586aca85aaa25a23039e278b39153a0ec0c9691fafce",
+  "operations": [
+    {
+      "removeColumn": {
+        "column": "price",
+        "table": "products"
+      }
+    }
+  ]
+}

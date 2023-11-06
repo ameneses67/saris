@@ -1,0 +1,56 @@
+---
+// Librerías
+import { XataClient } from '../../xata';
+
+type Props = {
+  errors: Record<string, string>
+}
+
+const xata = new XataClient({
+  apiKey: import.meta.env.XATA_API_KEY,
+  branch: import.meta.env.XATA_BRANCH,
+});
+
+const categories = await xata.db.categories.select(["id", "category"]).getAll();
+
+const {errors} = Astro.props
+---
+
+<form method='post' enctype="multipart/form-data" class="flex flex-col max-w-md mx-auto">
+  <div class="space-y-1">
+    <label for="name" class="block font-semibold">Producto:</label>
+    <input type="text" name="name" id="name" class="w-full rounded-lg border-slate-300">
+    <div class="h-6">
+      {errors.product && <p class="text-red-600 font-semibold text-sm">{errors.product}</p>}
+    </div>
+  </div>
+  <div class="space-y-1">
+    <label for="description" class="block font-semibold">Descripción:</label>
+    <textarea name="description" id="description" cols="30" rows="5" class="w-full rounded-lg border-slate-300"></textarea>
+    <div class="h-6">
+      {errors.description && <p class="text-red-600 font-semibold text-sm">{errors.description}</p>}
+    </div>
+  </div>
+  <div class="space-y-1">
+    <label for="price" class="block font-semibold">Precio:</label>
+    <input type="number" name="price" id="price" class="w-full rounded-lg border-slate-300">
+    <div class="h-6">
+      {errors.price && <p class="text-red-600 font-semibold text-sm">{errors.price}</p>}
+    </div>
+  </div>
+  <div class="space-y-1">
+    <label for="category" class="block font-semibold">Categoría:</label>
+    <select name="category" id="category" class="w-full rounded-lg border-slate-300 cursor-pointer capitalize">
+      <option value="">-- Selecciona una categoría --</option>
+      {categories.map(category => <option value={category.id} class="capitalize">{category.category}</option>)}
+    </select>
+    <div class="h-6">
+      {errors.category && <p class="text-red-600 font-semibold text-sm">{errors.category}</p>}
+    </div>
+  </div>
+  <div class="space-y-1">
+    <label for="portada" class="block font-semibold">Imagen de portada:</label>
+    <input type="file" name="portada" id="portada" accept="image/png, image/jpeg, image/webp" class="w-full rounded-lg border-slate-300">
+  </div>
+  <button type="submit" class="rounded-lg bg-sky-700 text-lg capitalize text-sky-50 hover:bg-sky-600 shadow py-2 font-bold xs:w-1/2 mt-6 transition">Crear producto</button>
+</form>

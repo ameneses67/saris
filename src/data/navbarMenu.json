@@ -2,7 +2,7 @@
 	{
 		"menu": [
 			{ "name": "Inicio", "src": "/" },
-			{ "name": "Acerca de", "src": "/acerca-de" },
+			{ "name": "Productos", "src": "/productos" },
 			{ "name": "Categorías", "src": "/" }
 		]
 	},

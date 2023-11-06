@@ -21,11 +21,11 @@ const [{ menu }, { dropdown }] = menuData;
 import saris from "../assets/logo/saris-negro.png";
 ---
 
-<StickyHeader>
+<header>
 	<Container className="md:flex md:items-center md:justify-between py-2 gap-5">
 		<Astronav closeOnClick>
 			<div class="flex justify-between items-center">
-				<a>
+				<a href="/">
 					<Image
 						src={saris}
 						alt="Logotipo Saris"
@@ -40,7 +40,7 @@ import saris from "../assets/logo/saris-negro.png";
 						menu?.map(
 							(item) =>
 								item.name !== "Categorías" && (
-									<li>
+									<li class="hover:text-slate-700">
 										<a href={item.src}>{item.name}</a>
 									</li>
 								)
@@ -48,7 +48,7 @@ import saris from "../assets/logo/saris-negro.png";
 					}
 					<Dropdown class="group">
 						<button class="flex items-center gap-1">
-							<span>Categorías</span>
+							<span class="hover:text-slate-700">Categorías</span>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -65,11 +65,13 @@ import saris from "../assets/logo/saris-negro.png";
 							</svg>
 						</button>
 						<DropdownItems class="relative">
-							<div class="absolute top-0">
-								<ul>
+							<div
+								class="absolute top-[19px] bg-slate-50/90 p-4 left-0 md:-left-8 right-0 rounded border border-slate-200"
+							>
+								<ul class="space-y-2">
 									{
 										dropdown?.map((item) => (
-											<li>
+											<li class="hover:text-slate-700 border-b border-slate-200 pb-2 last:border-none text-center">
 												<a href={item.src}>{item.name}</a>
 											</li>
 										))
@@ -82,4 +84,4 @@ import saris from "../assets/logo/saris-negro.png";
 			</MenuItems>
 		</Astronav>
 	</Container>
-</StickyHeader>
+</header>

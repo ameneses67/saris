@@ -1,0 +1,87 @@
+---
+// Librerías
+import {XataFile} from '@xata.io/client'
+import { XataClient } from "../xata";
+
+// Layout
+import MainLayout from "../layouts/MainLayout.astro";
+
+// Componentes
+import ProductForm from "../components/forms/ProductForm.astro";
+import Container from "../components/elements/Container.astro";
+import SectionHead from "../components/elements/SectionHead.astro";
+
+// Utilidades
+import {getBase64} from '../utils/utils'
+
+const xata = new XataClient({
+  apiKey: import.meta.env.XATA_API_KEY,
+  branch: import.meta.env.XATA_BRANCH,
+});
+
+const errors: Record<string, string> = {};
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const title = formData.get("name") as string;
+    const description = formData.get("description");
+    const price = Number(formData.get("price"));
+    const category = formData.get('category');
+    const coverImage = formData.get('portada') as File
+    const base64CoverImage = getBase64(coverImage)
+
+    console.log(formData)
+
+    // User already exists
+    // const isRegistered = await xata.db.users.filter("email", email).getFirst();
+
+    // // Validating form data
+    // if (typeof name !== "string" || name.length < 1) {
+    //   errors.username = "Por favor ingresa un nombre de usuario.";
+    // }
+    // if (typeof email !== "string" || !isValidEmail(email)) {
+    //   errors.email = "Correo electrónico no válido.";
+    // } else if (isRegistered) {
+    //   errors.email =
+    //     "Ya existe una cuenta con este correo electrónico. Por favor inicia sesión.";
+    // }
+
+    // Do something with the data
+    const hasErrors = Object.values(errors).some((msg) => msg);
+    if (!hasErrors) {
+      const product = await xata.db.products.create({
+        title,
+        description,
+        price,
+        category,
+        coverImage: XataFile.fromBase64(base64CoverImage)
+      })
+
+      console.log(product)
+
+      return Astro.redirect("/", 302);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+  }
+}
+
+const title = "Crear Productos";
+const description =
+  "Alta productos nuevos";
+---
+
+<MainLayout {title} {description}>
+  <Container className="space-y-16">
+    <SectionHead tagType="h1" hClass="h1">
+      <Fragment slot="title">{title}</Fragment>
+      <Fragment slot="desc">
+        Llena el formulario y crea tus productos. Recuerda que todos los campos son obligatorios y el precio es en pesos mexicanos.
+      </Fragment>
+    </SectionHead>
+    <ProductForm {errors}/>
+  </Container>
+</MainLayout>

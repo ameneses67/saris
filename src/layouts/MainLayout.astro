@@ -28,12 +28,10 @@ const { title, description } = Astro.props;
 			content={description}
 		/>
 	</head>
-	<body class="text-slate-500">
+	<body class="text-slate-500 bg-slate-50">
 		<Header />
-		<main>
-			<Container>
-				<slot />
-			</Container>
+		<main class="space-y-8 sm:space-y-16 py-8 sm:py-16">
+			<slot />
 		</main>
 	</body>
 </html>

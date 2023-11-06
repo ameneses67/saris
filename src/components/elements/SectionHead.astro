@@ -1,0 +1,21 @@
+---
+// Componentes
+import Heading from "./Heading.astro";
+
+interface Props {
+  align?: string;
+  tagType: string;
+  hClass: "h1" | "h2" | "h3";
+}
+
+const { align = "center", tagType, hClass } = Astro.props;
+---
+
+<section class:list={["space-y-4", align === "center" ? "text-center" : 'text-left']}>
+  <Heading tagType={tagType} hClass={hClass} classes={align === 'center' ? 'text-center' : 'text-left'}>
+    <slot name="title" />
+  </Heading>
+  <p class="mx-auto max-w-2xl text-lg sm:text-xl">
+    <slot name="desc">Some description goes here</slot>
+  </p>
+</section>

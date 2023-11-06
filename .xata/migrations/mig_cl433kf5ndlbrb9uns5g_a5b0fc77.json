@@ -1,0 +1,18 @@
+{
+  "id": "mig_cl433kf5ndlbrb9uns5g",
+  "parentID": "mig_cl433fn5ndlbrb9uns4g",
+  "checksum": "1:a5b0fc7733c9f169c08e1e44db0d14e1857f3eeca235ea590bae764348770fe2",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "price",
+          "type": "int",
+          "notNull": true,
+          "defaultValue": "0"
+        },
+        "table": "products"
+      }
+    }
+  ]
+}

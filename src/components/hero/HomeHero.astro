@@ -1,0 +1,19 @@
+---
+// Librerías
+import { Image } from "astro:assets";
+
+// Images
+import bgImg from "../../assets/images/sala-de-estar.jpg";
+import Container from "../elements/Container.astro";
+---
+
+<section class="relative min-h-screen">
+	<Image
+		src={bgImg}
+		alt=""
+		format="avif"
+		quality="low"
+		class="absolute inset-0 h-full w-full object-cover"
+	/>
+	<div class="absolute inset-0 bg-slate-950/50"></div>
+</section>

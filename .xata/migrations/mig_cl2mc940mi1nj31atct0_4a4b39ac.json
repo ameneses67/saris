@@ -1,0 +1,16 @@
+{
+  "id": "mig_cl2mc940mi1nj31atct0",
+  "parentID": "mig_cl2majs0mi1nj31atcs0",
+  "checksum": "1:4a4b39ac40744ed46876a8a43222dd994a3a84169e8a86af1586032e123286d5",
+  "operations": [
+    {
+      "addColumn": {
+        "column": {
+          "name": "coverImage",
+          "type": "file"
+        },
+        "table": "products"
+      }
+    }
+  ]
+}
