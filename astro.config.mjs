@@ -7,7 +7,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    platformProxy: { enabled: true },
+    // Las sesiones las maneja Better Auth con D1, no necesitamos KV
+    needsSessionKVBinding: false,
+  }),
   integrations: [react()],
 
   vite: {
