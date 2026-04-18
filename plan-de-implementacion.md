@@ -17,7 +17,7 @@
 - [x] **0.3** Crear bucket R2 `saris-media` en Cloudflare Dashboard
 - [x] **0.4** Copiar `.env.example` a `.env` y completar las credenciales de Cloudflare
 - [x] **0.5** Aplicar migración inicial a D1 (`npm run db:migrate`)
-- [ ] **0.6** Conectar repositorio a Cloudflare Pages (CI/CD automático en cada push a `main`)
+- [x] **0.6** Conectar repositorio a Cloudflare Pages (CI/CD automático en cada push a `main`)
 
 ---
 
