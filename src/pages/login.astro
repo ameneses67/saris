@@ -1,0 +1,33 @@
+---
+import '../styles/global.css'
+import LoginForm from '../components/LoginForm'
+
+// Si ya hay sesión, redirigir al admin
+const session = Astro.locals.session
+if (session) {
+  return Astro.redirect('/admin')
+}
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>Entrar — Saris</title>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div class="w-full max-w-sm">
+      <div class="mb-8 text-center">
+        <h1 class="text-2xl font-bold text-gray-900">Saris</h1>
+        <p class="mt-1 text-sm text-gray-500">Inicia sesión para continuar</p>
+      </div>
+
+      <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <LoginForm client:load />
+      </div>
+    </div>
+  </body>
+</html>

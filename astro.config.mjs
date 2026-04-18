@@ -7,11 +7,9 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: cloudflare({
-    platformProxy: { enabled: true },
-    // Las sesiones las maneja Better Auth con D1, no necesitamos KV
-    needsSessionKVBinding: false,
-  }),
+  // needsSessionKVBinding no está en los tipos públicos del adaptador
+  // pero existe en runtime — evita que Cloudflare Pages provea un KV para sesiones
+  adapter: cloudflare(/** @type {any} */({ needsSessionKVBinding: false })),
   integrations: [react()],
 
   vite: {
