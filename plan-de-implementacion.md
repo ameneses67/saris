@@ -12,11 +12,11 @@
 
 > Objetivo: tener el entorno listo para desarrollar. Sin esta fase no se puede avanzar.
 
-- [ ] **0.1** Crear repositorio Git e inicializar con el código actual
-- [ ] **0.2** Crear base de datos D1 en Cloudflare Dashboard y actualizar `database_id` en `wrangler.jsonc`
-- [ ] **0.3** Crear bucket R2 `saris-media` en Cloudflare Dashboard
-- [ ] **0.4** Copiar `.env.example` a `.env` y completar las credenciales de Cloudflare
-- [ ] **0.5** Aplicar migración inicial a D1 (`npm run db:migrate`)
+- [x] **0.1** Crear repositorio Git e inicializar con el código actual
+- [x] **0.2** Crear base de datos D1 en Cloudflare Dashboard y actualizar `database_id` en `wrangler.jsonc`
+- [x] **0.3** Crear bucket R2 `saris-media` en Cloudflare Dashboard
+- [x] **0.4** Copiar `.env.example` a `.env` y completar las credenciales de Cloudflare
+- [x] **0.5** Aplicar migración inicial a D1 (`npm run db:migrate`)
 - [ ] **0.6** Conectar repositorio a Cloudflare Pages (CI/CD automático en cada push a `main`)
 
 ---

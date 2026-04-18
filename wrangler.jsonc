@@ -1,26 +1,26 @@
 {
-	"compatibility_date": "2026-04-18",
-	"compatibility_flags": ["global_fetch_strictly_public"],
-	"name": "saris",
-	"main": "@astrojs/cloudflare/entrypoints/server",
-	"assets": {
-		"directory": "./dist",
-		"binding": "ASSETS"
-	},
-	"observability": {
-		"enabled": true
-	},
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "saris-db",
-			"database_id": "placeholder-replace-after-creation"
-		}
-	],
-	"r2_buckets": [
-		{
-			"binding": "R2",
-			"bucket_name": "saris-media"
-		}
-	]
+  "compatibility_date": "2026-04-18",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "name": "saris",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "d1_databases": [
+    {
+      "binding": "saris_db",
+      "database_name": "saris-db",
+      "database_id": "f7af572a-e146-4e1e-9048-c81f4a90ae4b",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "saris-media",
+    },
+  ],
 }

@@ -11,6 +11,6 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": ["@cloudflare/workers-types", "node"]
+    "types": ["node"]
   }
 }
