@@ -7,11 +7,9 @@ import { getAuth } from '../../lib/auth'
 // Endpoint temporal — eliminar después de crear el primer admin
 export const POST: APIRoute = async (context) => {
   try {
-    const env = context.locals.runtime.env
-    const db = getDb(env)
-    const auth = getAuth(env)
+    const db = getDb()
+    const auth = getAuth()
 
-    // Solo funciona si no existen usuarios
     const existing = await db.query.user.findFirst()
     if (existing) {
       return new Response(JSON.stringify({ error: 'Ya existen usuarios' }), {
@@ -26,7 +24,6 @@ export const POST: APIRoute = async (context) => {
       body: { name: body.name, email: body.email, password: body.password },
     })
 
-    // Promover a admin
     await db.update(user).set({ role: 'admin' }).where(eq(user.id, result.user.id))
 
     return new Response(JSON.stringify({ ok: true, email: result.user.email }), {

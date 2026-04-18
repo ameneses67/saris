@@ -5,7 +5,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = new URL(context.request.url)
 
   if (pathname.startsWith('/admin')) {
-    const auth = getAuth(context.locals.runtime.env)
+    const auth = getAuth()
     const session = await auth.api.getSession({ headers: context.request.headers })
 
     if (!session) {
