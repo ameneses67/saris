@@ -1,0 +1,26 @@
+{
+	"compatibility_date": "2026-04-18",
+	"compatibility_flags": ["global_fetch_strictly_public"],
+	"name": "saris",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "saris-db",
+			"database_id": "placeholder-replace-after-creation"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "R2",
+			"bucket_name": "saris-media"
+		}
+	]
+}
