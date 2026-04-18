@@ -25,12 +25,12 @@
 
 > Objetivo: login funcionando y estructura de layouts lista. Todo lo que venga después se construye sobre esto.
 
-- [ ] **1.1** Configurar Better Auth: instancia del servidor, esquema de usuario con rol, endpoint `/api/auth/[...all]`
-- [ ] **1.2** Crear middleware de Astro que proteja todas las rutas `/admin/*` — redirige a login si no hay sesión
-- [ ] **1.3** Layout base público — estructura HTML, importar Tailwind, placeholder de header y footer
-- [ ] **1.4** Layout base de administración — sidebar con navegación, header con nombre de usuario y botón de cerrar sesión
-- [ ] **1.5** Página de login — formulario de email/contraseña, manejo de errores, redirección tras autenticación exitosa
-- [ ] **1.6** Funcionalidad de cierre de sesión
+- [x] **1.1** Configurar Better Auth: instancia del servidor, esquema de usuario con rol, endpoint `/api/auth/[...all]`
+- [x] **1.2** Crear middleware de Astro que proteja todas las rutas `/admin/*` — redirige a login si no hay sesión
+- [x] **1.3** Layout base público — estructura HTML, importar Tailwind, placeholder de header y footer
+- [x] **1.4** Layout base de administración — sidebar con navegación, header con nombre de usuario y botón de cerrar sesión
+- [x] **1.5** Página de login — formulario de email/contraseña, manejo de errores, redirección tras autenticación exitosa
+- [x] **1.6** Funcionalidad de cierre de sesión
 
 ---
 
