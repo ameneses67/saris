@@ -1,0 +1,21 @@
+---
+import { asc } from 'drizzle-orm'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { categories, subcategories } from '../../../db/schema'
+import SubcategoriesManager from '../../../components/admin/SubcategoriesManager'
+
+const db = getDb()
+const [allCategories, allSubcategories] = await Promise.all([
+  db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+  db.select().from(subcategories).orderBy(asc(subcategories.sortOrder), asc(subcategories.name)),
+])
+---
+
+<AdminLayout title="Subcategorías">
+  <SubcategoriesManager
+    client:load
+    categories={allCategories}
+    initialSubcategories={allSubcategories}
+  />
+</AdminLayout>

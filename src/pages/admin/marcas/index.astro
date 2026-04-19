@@ -1,0 +1,17 @@
+---
+import { asc } from 'drizzle-orm'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { brands } from '../../../db/schema'
+import BrandsManager from '../../../components/admin/BrandsManager'
+
+const db = getDb()
+const allBrands = await db
+  .select()
+  .from(brands)
+  .orderBy(asc(brands.sortOrder), asc(brands.name))
+---
+
+<AdminLayout title="Marcas">
+  <BrandsManager client:load initialBrands={allBrands} />
+</AdminLayout>

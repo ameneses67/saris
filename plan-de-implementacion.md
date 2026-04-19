@@ -39,19 +39,19 @@
 > Objetivo: poder gestionar las listas predefinidas de categorías, subcategorías y marcas antes de crear productos.
 
 **Categorías**
-- [ ] **2.1** Listado de categorías — tabla con nombre, slug, orden y acciones
-- [ ] **2.2** Formulario de creación de categoría — con generación automática de slug
-- [ ] **2.3** Edición y eliminación de categoría
+- [x] **2.1** Listado de categorías — tabla con nombre, slug, orden y acciones
+- [x] **2.2** Formulario de creación de categoría — con generación automática de slug
+- [x] **2.3** Edición y eliminación de categoría
 
 **Subcategorías**
-- [ ] **2.4** Listado de subcategorías — agrupadas por categoría
-- [ ] **2.5** Formulario de creación de subcategoría — con selector de categoría y generación de slug
-- [ ] **2.6** Edición y eliminación de subcategoría
+- [x] **2.4** Listado de subcategorías — agrupadas por categoría
+- [x] **2.5** Formulario de creación de subcategoría — con selector de categoría y generación de slug
+- [x] **2.6** Edición y eliminación de subcategoría
 
 **Marcas**
-- [ ] **2.7** Listado de marcas
-- [ ] **2.8** Formulario de creación de marca — con generación de slug
-- [ ] **2.9** Edición y eliminación de marca
+- [x] **2.7** Listado de marcas
+- [x] **2.8** Formulario de creación de marca — con generación de slug
+- [x] **2.9** Edición y eliminación de marca
 
 ---
 

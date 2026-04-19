@@ -1,0 +1,17 @@
+---
+import { asc } from 'drizzle-orm'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { categories } from '../../../db/schema'
+import CategoriesManager from '../../../components/admin/CategoriesManager'
+
+const db = getDb()
+const allCategories = await db
+  .select()
+  .from(categories)
+  .orderBy(asc(categories.sortOrder), asc(categories.name))
+---
+
+<AdminLayout title="Categorías">
+  <CategoriesManager client:load initialCategories={allCategories} />
+</AdminLayout>
