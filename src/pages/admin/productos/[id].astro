@@ -1,0 +1,54 @@
+---
+import { asc, eq } from 'drizzle-orm'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { products, categories, subcategories, brands, productPhotos, productVariants } from '../../../db/schema'
+import ProductDetail from '../../../components/admin/ProductDetail'
+
+const { id } = Astro.params
+const db = getDb()
+
+const [product] = await db
+  .select({
+    id: products.id,
+    slug: products.slug,
+    name: products.name,
+    description: products.description,
+    categoryId: products.categoryId,
+    categoryName: categories.name,
+    subcategoryId: products.subcategoryId,
+    subcategoryName: subcategories.name,
+    brandId: products.brandId,
+    brandName: brands.name,
+    basePrice: products.basePrice,
+    status: products.status,
+  })
+  .from(products)
+  .leftJoin(categories, eq(products.categoryId, categories.id))
+  .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
+  .leftJoin(brands, eq(products.brandId, brands.id))
+  .where(eq(products.id, id!))
+  .limit(1)
+
+if (!product) return Astro.redirect('/admin/productos')
+
+const [allCategories, allSubcategories, allBrands, allPhotos, allVariants] = await Promise.all([
+  db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+  db.select().from(subcategories).orderBy(asc(subcategories.sortOrder), asc(subcategories.name)),
+  db.select().from(brands).orderBy(asc(brands.sortOrder), asc(brands.name)),
+  db.select().from(productPhotos).where(eq(productPhotos.productId, id!)).orderBy(asc(productPhotos.sortOrder)),
+  db.select().from(productVariants).where(eq(productVariants.productId, id!)).orderBy(asc(productVariants.createdAt)),
+])
+---
+
+<AdminLayout title={product.name}>
+  <ProductDetail
+    client:load
+    product={product}
+    initialPhotos={allPhotos}
+    initialVariants={allVariants}
+    categories={allCategories}
+    subcategories={allSubcategories}
+    brands={allBrands}
+  />
+</AdminLayout>

@@ -1,0 +1,69 @@
+---
+import { and, asc, desc, eq, isNotNull, or } from 'drizzle-orm'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { products, categories, subcategories, brands, productPhotos, productVariants, discounts } from '../../../db/schema'
+import ProductsManager from '../../../components/admin/ProductsManager'
+import { resolveDiscount } from '../../../lib/resolveDiscount'
+
+const db = getDb()
+
+const [rawProducts, allCategories, allSubcategories, allBrands, allVariantSummaries, activeDiscounts] = await Promise.all([
+  db
+    .select({
+      id: products.id,
+      slug: products.slug,
+      name: products.name,
+      description: products.description,
+      categoryId: products.categoryId,
+      categoryName: categories.name,
+      subcategoryId: products.subcategoryId,
+      subcategoryName: subcategories.name,
+      brandId: products.brandId,
+      brandName: brands.name,
+      basePrice: products.basePrice,
+      status: products.status,
+      createdAt: products.createdAt,
+      mainPhotoKey: productPhotos.r2Key,
+    })
+    .from(products)
+    .leftJoin(categories, eq(products.categoryId, categories.id))
+    .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
+    .leftJoin(brands, eq(products.brandId, brands.id))
+    .leftJoin(
+      productPhotos,
+      and(eq(productPhotos.productId, products.id), eq(productPhotos.sortOrder, 0))
+    )
+    .orderBy(desc(products.createdAt)),
+  db.select().from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+  db.select().from(subcategories).orderBy(asc(subcategories.sortOrder), asc(subcategories.name)),
+  db.select().from(brands).orderBy(asc(brands.sortOrder), asc(brands.name)),
+  // Solo color y talla de variantes (para filtros)
+  db
+    .select({ productId: productVariants.productId, color: productVariants.color, size: productVariants.size })
+    .from(productVariants)
+    .where(or(isNotNull(productVariants.color), isNotNull(productVariants.size))),
+  db.select().from(discounts).where(eq(discounts.active, true)),
+])
+
+// Calcular precio con descuento para cada producto (usando variante nula = basePrice)
+const allProducts = rawProducts.map((p) => {
+  const resolved = resolveDiscount(
+    { id: p.id, categoryId: p.categoryId, subcategoryId: p.subcategoryId, brandId: p.brandId, basePrice: p.basePrice },
+    { color: null, size: null, priceOverride: null },
+    activeDiscounts,
+  )
+  return { ...p, discountedPrice: resolved?.finalPrice ?? null }
+})
+---
+
+<AdminLayout title="Productos">
+  <ProductsManager
+    client:load
+    initialProducts={allProducts}
+    categories={allCategories}
+    subcategories={allSubcategories}
+    brands={allBrands}
+    variantSummaries={allVariantSummaries}
+  />
+</AdminLayout>
