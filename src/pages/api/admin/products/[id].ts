@@ -14,6 +14,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     subcategoryId: string
     brandId: string
     basePrice: number
+    featured?: boolean
     status?: 'active' | 'inactive'
   }
 
@@ -36,6 +37,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
       subcategoryId: body.subcategoryId,
       brandId: body.brandId,
       basePrice: Math.round(body.basePrice),
+      featured: body.featured ?? false,
       status: body.status ?? 'active',
       updatedAt: new Date(),
     })

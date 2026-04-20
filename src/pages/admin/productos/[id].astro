@@ -21,6 +21,7 @@ const [product] = await db
     brandId: products.brandId,
     brandName: brands.name,
     basePrice: products.basePrice,
+    featured: products.featured,
     status: products.status,
   })
   .from(products)

@@ -20,6 +20,7 @@ interface Product {
   brandId: string
   brandName: string | null
   basePrice: number
+  featured: boolean
   status: 'active' | 'inactive'
 }
 
@@ -101,6 +102,7 @@ export default function ProductDetail({
     const priceDisplay = (form.elements.namedItem('basePrice') as HTMLInputElement).value
     const basePrice = displayToCentavos(priceDisplay)
     const status = (form.elements.namedItem('status') as unknown as HTMLSelectElement).value as 'active' | 'inactive'
+    const featured = (form.elements.namedItem('featured') as HTMLInputElement).checked
 
     try {
       const res = await fetch(`/api/admin/products/${product.id}`, {
@@ -113,6 +115,7 @@ export default function ProductDetail({
           subcategoryId: selectedSubcategoryId,
           brandId,
           basePrice,
+          featured,
           status,
         }),
       })
@@ -433,6 +436,20 @@ export default function ProductDetail({
               </select>
             </div>
           </div>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              id="featured"
+              name="featured"
+              type="checkbox"
+              defaultChecked={product.featured}
+              className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Producto destacado</span>
+              <p className="text-xs text-gray-400">Aparece en la sección de destacados del homepage</p>
+            </div>
+          </label>
 
           <div className="flex items-center justify-between pt-2">
             <p className="text-xs text-gray-400 font-mono">slug: {product.slug}</p>

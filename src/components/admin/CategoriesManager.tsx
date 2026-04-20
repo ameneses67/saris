@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface Category {
   id: string
   name: string
   slug: string
+  description: string | null
+  photoKey: string | null
   sortOrder: number
 }
 
@@ -22,20 +24,26 @@ export default function CategoriesManager({ initialCategories }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [photoLoading, setPhotoLoading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function openCreate() {
     setError('')
+    setPhotoError('')
     setModal({ open: true, category: null })
   }
 
   function openEdit(category: Category) {
     setError('')
+    setPhotoError('')
     setModal({ open: true, category })
   }
 
   function closeModal() {
     setModal({ open: false, category: null })
     setError('')
+    setPhotoError('')
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -45,6 +53,7 @@ export default function CategoriesManager({ initialCategories }: Props) {
 
     const form = e.currentTarget
     const name = (form.elements.namedItem('name') as HTMLInputElement).value.trim()
+    const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value.trim()
     const sortOrder = parseInt((form.elements.namedItem('sortOrder') as HTMLInputElement).value) || 0
 
     const isEdit = !!modal.category
@@ -57,7 +66,7 @@ export default function CategoriesManager({ initialCategories }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, sortOrder }),
+        body: JSON.stringify({ name, description: description || null, sortOrder }),
       })
 
       if (!res.ok) {
@@ -81,6 +90,63 @@ export default function CategoriesManager({ initialCategories }: Props) {
       setError('Error de conexión')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !modal.category) return
+
+    setPhotoLoading(true)
+    setPhotoError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const res = await fetch(`/api/admin/categories/${modal.category.id}/photo`, {
+        method: 'PUT',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const data = await res.json() as { error: string }
+        setPhotoError(data.error || 'Error al subir')
+        return
+      }
+
+      const updated: Category = await res.json()
+      setModal({ open: true, category: updated })
+      setCategories((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+    } catch {
+      setPhotoError('Error de conexión')
+    } finally {
+      setPhotoLoading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  async function handlePhotoDelete() {
+    if (!modal.category) return
+    setPhotoLoading(true)
+    setPhotoError('')
+
+    try {
+      const res = await fetch(`/api/admin/categories/${modal.category.id}/photo`, { method: 'DELETE' })
+
+      if (!res.ok) {
+        const data = await res.json() as { error: string }
+        setPhotoError(data.error || 'Error al eliminar')
+        return
+      }
+
+      const updated: Category = await res.json()
+      setModal({ open: true, category: updated })
+      setCategories((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
+    } catch {
+      setPhotoError('Error de conexión')
+    } finally {
+      setPhotoLoading(false)
     }
   }
 
@@ -145,8 +211,9 @@ export default function CategoriesManager({ initialCategories }: Props) {
           <table className="w-full text-sm">
             <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
+                <th className="px-4 py-3 w-12" />
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Nombre</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-600">Slug</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-600 hidden md:table-cell">Slug</th>
                 <th className="px-4 py-3 text-center font-medium text-gray-600 w-20">Orden</th>
                 <th className="px-4 py-3 w-24" />
               </tr>
@@ -154,8 +221,28 @@ export default function CategoriesManager({ initialCategories }: Props) {
             <tbody className="divide-y divide-gray-100">
               {categories.map((category) => (
                 <tr key={category.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{category.name}</td>
-                  <td className="px-4 py-3 text-gray-500 font-mono text-xs">{category.slug}</td>
+                  <td className="px-4 py-3">
+                    {category.photoKey ? (
+                      <img
+                        src={`/api/media/${category.photoKey}`}
+                        alt={category.name}
+                        className="h-10 w-10 rounded-md object-cover bg-gray-100"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-gray-900">{category.name}</p>
+                    {category.description && (
+                      <p className="text-xs text-gray-400 truncate max-w-xs">{category.description}</p>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 font-mono text-xs hidden md:table-cell">{category.slug}</td>
                   <td className="px-4 py-3 text-center text-gray-500">{category.sortOrder}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
@@ -188,9 +275,9 @@ export default function CategoriesManager({ initialCategories }: Props) {
 
       {/* Modal crear/editar */}
       {modal.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4">
           <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-          <div className="relative w-full max-w-md rounded-xl bg-white shadow-xl">
+          <div className="relative my-8 w-full max-w-md rounded-xl bg-white shadow-xl">
             <div className="border-b border-gray-200 px-6 py-4">
               <h2 className="text-base font-semibold text-gray-900">
                 {modal.category ? 'Editar categoría' : 'Nueva categoría'}
@@ -215,6 +302,19 @@ export default function CategoriesManager({ initialCategories }: Props) {
                   autoFocus
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                   placeholder="Ej. Ropa de mujer"
+                />
+              </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows={3}
+                  defaultValue={modal.category?.description ?? ''}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 resize-none"
+                  placeholder="Descripción breve de la categoría…"
                 />
               </div>
               <div>
@@ -248,6 +348,65 @@ export default function CategoriesManager({ initialCategories }: Props) {
                 </button>
               </div>
             </form>
+
+            {/* Foto — solo disponible en modo edición (necesitamos el ID) */}
+            {modal.category && (
+              <div className="border-t border-gray-200 px-6 py-4">
+                <p className="text-sm font-medium text-gray-700 mb-3">Foto representativa</p>
+                {photoError && (
+                  <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {photoError}
+                  </div>
+                )}
+                {modal.category.photoKey ? (
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={`/api/media/${modal.category.photoKey}`}
+                      alt={modal.category.name}
+                      className="h-24 w-24 rounded-lg object-cover border border-gray-200"
+                    />
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={photoLoading}
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                      >
+                        {photoLoading ? 'Subiendo…' : 'Reemplazar'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePhotoDelete}
+                        disabled={photoLoading}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      >
+                        Eliminar foto
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={photoLoading}
+                    className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 disabled:opacity-50 transition-colors w-full justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    {photoLoading ? 'Subiendo…' : 'Subir foto'}
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+                <p className="mt-2 text-xs text-gray-400">JPG, PNG, WEBP o AVIF. Máx. 5 MB.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

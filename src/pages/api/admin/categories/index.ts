@@ -11,7 +11,7 @@ export const GET: APIRoute = async () => {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  const body = await request.json() as { name: string; sortOrder?: number }
+  const body = await request.json() as { name: string; description?: string; sortOrder?: number }
 
   if (!body.name?.trim()) {
     return Response.json({ error: 'El nombre es requerido' }, { status: 400 })
@@ -24,6 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
       id: crypto.randomUUID(),
       name: body.name.trim(),
       slug: slugify(body.name.trim()),
+      description: body.description?.trim() ?? null,
       sortOrder: body.sortOrder ?? 0,
     })
     .returning()

@@ -21,6 +21,7 @@ interface Product {
   brandName: string | null
   basePrice: number
   discountedPrice: number | null
+  featured: boolean
   status: 'active' | 'inactive'
   mainPhotoKey: string | null
 }
@@ -211,7 +212,7 @@ export default function ProductsManager({ initialProducts, categories, subcatego
       const brandName = brands.find((b) => b.id === saved.brandId)?.name ?? null
 
       setProductList((prev) => [
-        { ...saved, categoryName: catName, subcategoryName: subName, brandName: brandName, mainPhotoKey: null, discountedPrice: null },
+        { ...saved, categoryName: catName, subcategoryName: subName, brandName: brandName, mainPhotoKey: null, discountedPrice: null, featured: false },
         ...prev,
       ])
       closeModal()
@@ -427,7 +428,14 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{product.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        {product.featured && (
+                          <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            Destacado
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-400 font-mono">{product.slug}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 hidden md:table-cell">

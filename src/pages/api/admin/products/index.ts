@@ -19,6 +19,7 @@ export const GET: APIRoute = async () => {
       brandId: products.brandId,
       brandName: brands.name,
       basePrice: products.basePrice,
+      featured: products.featured,
       status: products.status,
       createdAt: products.createdAt,
       mainPhotoKey: productPhotos.r2Key,
@@ -44,6 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
     subcategoryId: string
     brandId: string
     basePrice: number
+    featured?: boolean
     status?: 'active' | 'inactive'
   }
 
@@ -80,6 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
       subcategoryId: body.subcategoryId,
       brandId: body.brandId,
       basePrice: Math.round(body.basePrice),
+      featured: body.featured ?? false,
       status: body.status ?? 'active',
     })
     .returning()
