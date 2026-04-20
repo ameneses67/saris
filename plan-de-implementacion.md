@@ -97,15 +97,15 @@
 
 > Objetivo: el catálogo funcional, filtrable y compartible que verán los clientes.
 
-- [ ] **5.1** Componente de tarjeta de producto — foto, nombre, marca, precio con/sin descuento, botón de WhatsApp
-- [ ] **5.2** Página principal del catálogo (`/`) — grid de productos activos, orden por más recientes
-- [ ] **5.3** Paginación infinita — cargar más productos al hacer scroll (endpoint API + React island)
-- [ ] **5.4** Panel de filtros
+- [x] **5.1** Componente de tarjeta de producto — foto, nombre, marca, precio con/sin descuento, botón de WhatsApp
+- [x] **5.2** Página principal del catálogo (`/`) — grid de productos activos, orden por más recientes
+- [x] **5.3** Paginación infinita — cargar más productos al hacer scroll (endpoint API + React island)
+- [x] **5.4** Panel de filtros
   - Filtrar por: categoría, subcategoría, marca, color, talla, rango de precio
   - Los filtros activos se reflejan en la URL como query params
-- [ ] **5.5** Búsqueda por texto libre — filtra por nombre y descripción del producto
-- [ ] **5.6** URL compartible — al aplicar filtros la URL se actualiza; compartir esa URL reproduce los mismos filtros
-- [ ] **5.7** Página de detalle de producto (`/p/[slug]`)
+- [x] **5.5** Búsqueda por texto libre — filtra por nombre y descripción del producto
+- [x] **5.6** URL compartible — al aplicar filtros la URL se actualiza; compartir esa URL reproduce los mismos filtros
+- [x] **5.7** Página de detalle de producto (`/p/[slug]`)
   - Galería de fotos (principal + miniaturas)
   - Selector de variante (color/talla) con actualización de precio
   - Precio con descuento aplicado (tachado si hay descuento)

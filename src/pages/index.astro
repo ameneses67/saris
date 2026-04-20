@@ -1,7 +1,124 @@
 ---
+import { and, asc, desc, eq, isNotNull, or } from 'drizzle-orm'
 import Layout from '../layouts/Layout.astro'
+import { getDb } from '../db'
+import { brands, categories, discounts, productPhotos, products, productVariants, settings, subcategories } from '../db/schema'
+import { resolveDiscount } from '../lib/resolveDiscount'
+import Catalog from '../components/catalog/Catalog'
+
+const db = getDb()
+const sp = Astro.url.searchParams
+
+// Filtros iniciales desde la URL (para SSR de la primera página)
+const initialFilters = {
+  q:           sp.get('q')           ?? '',
+  category:    sp.get('category')    ?? '',
+  subcategory: sp.get('subcategory') ?? '',
+  brand:       sp.get('brand')       ?? '',
+  color:       sp.get('color')       ?? '',
+  size:        sp.get('size')        ?? '',
+  minPrice:    sp.get('minPrice')    ?? '',
+  maxPrice:    sp.get('maxPrice')    ?? '',
+}
+
+const LIMIT = 20
+
+// Construir condiciones para la query inicial
+import { gte, lte, like, exists, sql } from 'drizzle-orm'
+
+const conditions = [eq(products.status, 'active')] as ReturnType<typeof eq>[]
+
+if (initialFilters.category)    conditions.push(eq(products.categoryId, initialFilters.category))
+if (initialFilters.subcategory) conditions.push(eq(products.subcategoryId, initialFilters.subcategory))
+if (initialFilters.brand)       conditions.push(eq(products.brandId, initialFilters.brand))
+if (initialFilters.minPrice)    conditions.push(gte(products.basePrice, Math.round(parseFloat(initialFilters.minPrice) * 100)))
+if (initialFilters.maxPrice)    conditions.push(lte(products.basePrice, Math.round(parseFloat(initialFilters.maxPrice) * 100)))
+if (initialFilters.q) {
+  conditions.push(or(like(products.name, `%${initialFilters.q}%`), like(products.description, `%${initialFilters.q}%`)) as ReturnType<typeof eq>)
+}
+if (initialFilters.color) {
+  conditions.push(
+    exists(db.select({ _: sql`1` }).from(productVariants).where(
+      and(eq(productVariants.productId, products.id), eq(productVariants.color, initialFilters.color), eq(productVariants.status, 'active'))
+    )) as unknown as ReturnType<typeof eq>
+  )
+}
+if (initialFilters.size) {
+  conditions.push(
+    exists(db.select({ _: sql`1` }).from(productVariants).where(
+      and(eq(productVariants.productId, products.id), eq(productVariants.size, initialFilters.size), eq(productVariants.status, 'active'))
+    )) as unknown as ReturnType<typeof eq>
+  )
+}
+
+const [
+  rawProducts,
+  allCategories,
+  allSubcategories,
+  allBrands,
+  variantSummaries,
+  activeDiscounts,
+  whatsappSetting,
+] = await Promise.all([
+  db
+    .select({
+      id: products.id,
+      slug: products.slug,
+      name: products.name,
+      categoryId: products.categoryId,
+      subcategoryId: products.subcategoryId,
+      brandId: products.brandId,
+      brandName: brands.name,
+      basePrice: products.basePrice,
+      mainPhotoKey: productPhotos.r2Key,
+    })
+    .from(products)
+    .leftJoin(brands, eq(products.brandId, brands.id))
+    .leftJoin(productPhotos, and(eq(productPhotos.productId, products.id), eq(productPhotos.sortOrder, 0)))
+    .where(and(...conditions))
+    .orderBy(desc(products.createdAt))
+    .limit(LIMIT + 1),
+  db.select({ id: categories.id, name: categories.name }).from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+  db.select({ id: subcategories.id, categoryId: subcategories.categoryId, name: subcategories.name }).from(subcategories).orderBy(asc(subcategories.name)),
+  db.select({ id: brands.id, name: brands.name }).from(brands).orderBy(asc(brands.sortOrder), asc(brands.name)),
+  db.select({ color: productVariants.color, size: productVariants.size })
+    .from(productVariants)
+    .where(or(isNotNull(productVariants.color), isNotNull(productVariants.size))),
+  db.select().from(discounts).where(eq(discounts.active, true)),
+  db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'whatsapp_number')).limit(1),
+])
+
+const hasMore = rawProducts.length > LIMIT
+const pageRows = hasMore ? rawProducts.slice(0, LIMIT) : rawProducts
+
+const initialProducts = pageRows.map((p) => {
+  const resolved = resolveDiscount(
+    { id: p.id, categoryId: p.categoryId, subcategoryId: p.subcategoryId, brandId: p.brandId, basePrice: p.basePrice },
+    { color: null, size: null, priceOverride: null },
+    activeDiscounts,
+  )
+  return { ...p, discountedPrice: resolved?.finalPrice ?? null }
+})
+
+const colorOptions = [...new Set(variantSummaries.filter((v) => v.color).map((v) => v.color!))].sort()
+const sizeOptions  = [...new Set(variantSummaries.filter((v) => v.size).map((v) => v.size!))].sort()
+
+const whatsappNumber = whatsappSetting[0]?.value ?? ''
+const siteUrl = new URL(Astro.request.url).origin
 ---
 
 <Layout title="Catálogo" description="Catálogo de productos Saris">
-  <p class="text-gray-500">Catálogo próximamente.</p>
+  <Catalog
+    client:load
+    initialProducts={initialProducts}
+    initialHasMore={hasMore}
+    initialFilters={initialFilters}
+    categories={allCategories}
+    subcategories={allSubcategories}
+    brands={allBrands}
+    colorOptions={colorOptions}
+    sizeOptions={sizeOptions}
+    whatsappNumber={whatsappNumber}
+    siteUrl={siteUrl}
+  />
 </Layout>

@@ -1,0 +1,121 @@
+---
+import { and, asc, eq } from 'drizzle-orm'
+import Layout from '../../layouts/Layout.astro'
+import { getDb } from '../../db'
+import {
+  brands, categories, discounts, productPhotos,
+  products, productVariants, settings, subcategories,
+} from '../../db/schema'
+import { resolveDiscount } from '../../lib/resolveDiscount'
+import ProductGallery from '../../components/catalog/ProductGallery'
+
+const { slug } = Astro.params
+if (!slug) return Astro.redirect('/')
+
+const db = getDb()
+
+const productRows = await db
+  .select({
+    id: products.id,
+    slug: products.slug,
+    name: products.name,
+    description: products.description,
+    categoryId: products.categoryId,
+    categoryName: categories.name,
+    subcategoryId: products.subcategoryId,
+    subcategoryName: subcategories.name,
+    brandId: products.brandId,
+    brandName: brands.name,
+    basePrice: products.basePrice,
+    status: products.status,
+  })
+  .from(products)
+  .leftJoin(categories, eq(products.categoryId, categories.id))
+  .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
+  .leftJoin(brands, eq(products.brandId, brands.id))
+  .where(and(eq(products.slug, slug), eq(products.status, 'active')))
+  .limit(1)
+
+if (productRows.length === 0) return Astro.redirect('/')
+
+const product = productRows[0]
+
+const [photos, variants, activeDiscounts, whatsappSetting] = await Promise.all([
+  db.select().from(productPhotos)
+    .where(eq(productPhotos.productId, product.id))
+    .orderBy(asc(productPhotos.sortOrder)),
+  db.select().from(productVariants)
+    .where(and(eq(productVariants.productId, product.id), eq(productVariants.status, 'active'))),
+  db.select().from(discounts).where(eq(discounts.active, true)),
+  db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'whatsapp_number')).limit(1),
+])
+
+// Calcular precio con descuento para cada variante
+const variantsWithDiscount = variants.map((v) => {
+  const resolved = resolveDiscount(
+    { id: product.id, categoryId: product.categoryId, subcategoryId: product.subcategoryId, brandId: product.brandId, basePrice: product.basePrice },
+    { color: v.color, size: v.size, priceOverride: v.priceOverride },
+    activeDiscounts,
+  )
+  return {
+    id: v.id,
+    color: v.color,
+    size: v.size,
+    price: v.priceOverride ?? product.basePrice,
+    discountedPrice: resolved?.finalPrice ?? null,
+  }
+})
+
+const whatsappNumber = whatsappSetting[0]?.value ?? ''
+const siteUrl = new URL(Astro.request.url).origin
+
+const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
+---
+
+<Layout title={product.name} description={product.description}>
+  {/* Breadcrumb */}
+  <nav class="mb-6 flex items-center gap-2 text-sm text-gray-400">
+    <a href="/" class="hover:text-gray-700 transition-colors">Catálogo</a>
+    {product.categoryName && (
+      <>
+        <span>/</span>
+        <span>{product.categoryName}</span>
+      </>
+    )}
+    {product.subcategoryName && (
+      <>
+        <span>/</span>
+        <span>{product.subcategoryName}</span>
+      </>
+    )}
+  </nav>
+
+  <div class="mx-auto max-w-5xl">
+    {/* Nombre y marca */}
+    <div class="mb-6">
+      {product.brandName && (
+        <p class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-400">{product.brandName}</p>
+      )}
+      <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{product.name}</h1>
+    </div>
+
+    {/* Galería interactiva + variantes + precio + WhatsApp */}
+    <ProductGallery
+      client:load
+      photos={photos.map((p) => ({ id: p.id, r2Key: p.r2Key, sortOrder: p.sortOrder }))}
+      variants={variantsWithDiscount}
+      productName={product.name}
+      productSlug={product.slug}
+      whatsappNumber={whatsappNumber}
+      siteUrl={siteUrl}
+    />
+
+    {/* Descripción */}
+    {product.description && (
+      <div class="mt-10 border-t border-gray-100 pt-8">
+        <h2 class="mb-3 text-base font-semibold text-gray-900">Descripción</h2>
+        <p class="whitespace-pre-line text-sm leading-relaxed text-gray-600">{product.description}</p>
+      </div>
+    )}
+  </div>
+</Layout>
