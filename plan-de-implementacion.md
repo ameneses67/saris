@@ -59,22 +59,22 @@
 
 > Objetivo: el administrador y editor pueden capturar y gestionar el catálogo completo de productos.
 
-- [ ] **3.1** Listado de productos — tabla con foto miniatura, nombre, marca, precio, estado y acciones. Con filtro por estado y paginación
-- [ ] **3.2** Formulario de producto — campos base: nombre, descripción, categoría, subcategoría, marca, precio
+- [x] **3.1** Listado de productos — tabla con foto miniatura, nombre, marca, precio, estado y acciones. Con filtros por estado, categoría, subcategoría, marca, color y talla. Paginación cliente (20 por página)
+- [x] **3.2** Formulario de producto — campos base: nombre, descripción, categoría, subcategoría, marca, precio
   - Generación automática de slug a partir del nombre
   - Validación en servidor
-- [ ] **3.3** Subida de fotos del producto
+- [x] **3.3** Subida de fotos del producto
   - Upload directo a R2 (máximo 3 fotos)
   - Vista previa de imágenes
   - Reordenamiento de fotos (la primera es la principal)
   - Eliminación de foto individual
-- [ ] **3.4** Gestión de variantes dentro del formulario de producto
+- [x] **3.4** Gestión de variantes dentro del formulario de producto
   - Agregar variante con color, talla y precio opcional
   - Si no se definen variantes, se crea automáticamente una variante "default"
   - Editar y eliminar variantes
-- [ ] **3.5** Edición de producto existente — cargar todos los datos actuales en el formulario
-- [ ] **3.6** Activar / desactivar producto desde el listado (toggle rápido sin entrar al formulario)
-- [ ] **3.7** Eliminación de producto — eliminar fotos de R2 antes de borrar el registro
+- [x] **3.5** Edición de producto existente — cargar todos los datos actuales en el formulario
+- [x] **3.6** Activar / desactivar producto desde el listado (toggle rápido sin entrar al formulario)
+- [x] **3.7** Eliminación de producto — eliminar fotos de R2 antes de borrar el registro
 
 ---
 
@@ -82,14 +82,14 @@
 
 > Objetivo: poder crear descuentos individuales y masivos con vigencia por fechas.
 
-- [ ] **4.1** Listado de descuentos — tabla con estado (activo/programado/expirado), alcance, tipo, valor y fechas
-- [ ] **4.2** Formulario de descuento
+- [x] **4.1** Listado de descuentos — tabla con estado (activo/programado/expirado), alcance, tipo, valor y fechas
+- [x] **4.2** Formulario de descuento
   - Tipo: porcentaje o monto fijo
   - Alcance: todos, producto, categoría, subcategoría, marca, color, talla
   - Selector dinámico del valor del alcance (ej. si elige "categoría", muestra selector de categorías)
   - Fecha de inicio y fin (opcionales)
-- [ ] **4.3** Edición y desactivación manual de descuentos
-- [ ] **4.4** Función utilitaria `resolveDiscount(product, variant)` — consulta todos los descuentos activos que aplican y devuelve el de mayor valor. Usada tanto en el admin como en el catálogo público
+- [x] **4.3** Edición y desactivación manual de descuentos
+- [x] **4.4** Función utilitaria `resolveDiscount(product, variant)` — consulta todos los descuentos activos que aplican y devuelve el de mayor valor. Usada tanto en el admin como en el catálogo público
 
 ---
 
