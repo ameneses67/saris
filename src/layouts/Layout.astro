@@ -1,13 +1,31 @@
 ---
 import '../styles/global.css'
+import { inArray } from 'drizzle-orm'
+import { getDb } from '../db'
+import { settings } from '../db/schema'
 
 interface Props {
   title?: string
   description?: string
+  /** URL completa de la imagen para og:image */
+  ogImage?: string
+  /** Sobreescribe la URL canónica (por defecto: Astro.url.href) */
+  ogUrl?: string
 }
 
-const { title = 'Saris', description = 'Catálogo de productos' } = Astro.props
-const pageTitle = title === 'Saris' ? 'Saris' : `${title} — Saris`
+const { title = 'Saris', description = 'Catálogo de productos', ogImage, ogUrl } = Astro.props
+
+const db = getDb()
+const siteSettings = await db
+  .select({ key: settings.key, value: settings.value })
+  .from(settings)
+  .where(inArray(settings.key, ['site_name', 'ga_measurement_id']))
+
+const siteName = siteSettings.find((s) => s.key === 'site_name')?.value || 'Saris'
+const gaId     = siteSettings.find((s) => s.key === 'ga_measurement_id')?.value || ''
+
+const canonical = ogUrl ?? Astro.url.href
+const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
 ---
 
 <!doctype html>
@@ -15,17 +33,41 @@ const pageTitle = title === 'Saris' ? 'Saris' : `${title} — Saris`
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <title>{pageTitle}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- Slot para meta tags adicionales (ej. JSON-LD, og:type=product) -->
+    <slot name="head" />
+
+    <!-- Google Analytics -->
+    {gaId && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || []
+          function gtag() { dataLayer.push(arguments) }
+          gtag('js', new Date())
+          gtag('config', gaId)
+        </script>
+      </>
+    )}
   </head>
   <body class="min-h-screen bg-white text-gray-900">
     <header class="border-b border-gray-200">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
-          <a href="/" class="text-xl font-bold tracking-tight">Saris</a>
+          <a href="/" class="text-xl font-bold tracking-tight">{siteName}</a>
           <nav class="flex items-center gap-4 text-sm">
             <a href="/catalogo" class="text-gray-600 hover:text-gray-900 transition-colors">Catálogo</a>
           </nav>

@@ -68,11 +68,46 @@ const variantsWithDiscount = variants.map((v) => {
 
 const whatsappNumber = whatsappSetting[0]?.value ?? ''
 const siteUrl = new URL(Astro.request.url).origin
+const canonicalUrl = `${siteUrl}/p/${product.slug}`
 
-const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
+const mainPhoto = photos[0]
+const ogImage = mainPhoto ? `${siteUrl}/api/media/${mainPhoto.r2Key}` : undefined
+
+// Precio base en pesos (para JSON-LD el schema espera el valor numérico normal)
+const baseVariant = variantsWithDiscount[0]
+const displayPrice = baseVariant
+  ? ((baseVariant.discountedPrice ?? baseVariant.price) / 100).toFixed(2)
+  : (product.basePrice / 100).toFixed(2)
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.name,
+  description: product.description,
+  ...(photos.length > 0 && { image: photos.map((p) => `${siteUrl}/api/media/${p.r2Key}`) }),
+  ...(product.brandName && { brand: { '@type': 'Brand', name: product.brandName } }),
+  offers: {
+    '@type': 'Offer',
+    price: displayPrice,
+    priceCurrency: 'MXN',
+    availability: 'https://schema.org/InStock',
+    url: canonicalUrl,
+    seller: { '@type': 'Organization', name: 'Saris' },
+  },
+}
 ---
 
-<Layout title={product.name} description={product.description}>
+<Layout
+  title={product.name}
+  description={product.description}
+  ogImage={ogImage}
+  ogUrl={canonicalUrl}
+>
+  <Fragment slot="head">
+    <meta property="og:type" content="product" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
   {/* Breadcrumb */}
   <nav class="mb-6 flex items-center gap-2 text-sm text-gray-400">
     <a href="/" class="hover:text-gray-700 transition-colors">Catálogo</a>

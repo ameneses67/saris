@@ -110,6 +110,9 @@
   - Selector de variante (color/talla) con actualización de precio
   - Precio con descuento aplicado (tachado si hay descuento)
   - Botón "Contactar por WhatsApp" — abre WhatsApp con mensaje prellenado con el nombre del producto y URL
+- [x] **5.8** Homepage rediseñado (`/`) — secciones por categoría con hero + foto, grid de subcategorías, sección de productos destacados con botón de WhatsApp
+- [x] **5.9** Foto de categoría y subcategoría — upload/delete desde el panel admin (endpoint R2 + UI)
+- [x] **5.10** Campo `featured` en productos — toggle desde el listado admin para marcar productos destacados en el homepage
 
 ---
 
@@ -117,12 +120,12 @@
 
 > Objetivo: que los productos aparezcan en Google y que los links compartidos en WhatsApp generen previsualización.
 
-- [ ] **6.1** Meta tags dinámicos — `<title>` y `<meta name="description">` por página con datos reales del producto/sección
-- [ ] **6.2** Open Graph — `og:title`, `og:description`, `og:image`, `og:url` en la página de detalle de producto para previsualización en WhatsApp
-- [ ] **6.3** Sitemap dinámico — `/sitemap.xml` generado con todas las páginas de productos activos
-- [ ] **6.4** `robots.txt` — permitir indexación del catálogo, bloquear rutas de admin
-- [ ] **6.5** Datos estructurados JSON-LD — schema `Product` en la página de detalle (precio, disponibilidad, imagen)
-- [ ] **6.6** Integración de Google Analytics — script de GA4 en el layout público
+- [x] **6.1** Meta tags dinámicos — `<title>`, `<meta name="description">` y `<link rel="canonical">` en todas las páginas públicas; nombre del sitio leído desde `settings`
+- [x] **6.2** Open Graph — `og:title`, `og:description`, `og:image`, `og:url`, `og:type=product` en la página de detalle; props `ogImage` y `ogUrl` en el Layout
+- [x] **6.3** Sitemap dinámico — `/sitemap.xml` con homepage, `/catalogo` y todas las páginas de productos activos con `<lastmod>`
+- [x] **6.4** `robots.txt` dinámico — permite catálogo, bloquea `/admin/`, `/api/` y `/login`; incluye URL del sitemap
+- [x] **6.5** Datos estructurados JSON-LD — schema `Product` en `/p/[slug]` con nombre, descripción, imágenes, marca, precio y disponibilidad
+- [x] **6.6** Google Analytics GA4 — script gtag activado automáticamente si `ga_measurement_id` está configurado en Settings admin
 
 ---
 
@@ -137,8 +140,8 @@
 - [ ] **7.4** Perfil propio — cambiar nombre y contraseña
 
 **Configuración del sitio**
-- [ ] **7.5** Página de configuración — editar número de WhatsApp, nombre del sitio y eslogan
-- [ ] **7.6** Semilla de datos iniciales de `settings` en la migración o script aparte
+- [x] **7.5** Página de configuración — editar número de WhatsApp, nombre del sitio, dirección y horario (`/admin/configuracion`, solo rol admin)
+- [x] **7.6** Semilla de datos iniciales de `settings` — manejada mediante upsert en el endpoint PUT; las claves se crean al primer guardado sin necesidad de migración separada
 
 ---
 
@@ -162,15 +165,15 @@
 
 ## Resumen por fases
 
-| Fase | Descripción | Tareas |
-|---|---|---|
-| 0 | Infraestructura | 6 |
-| 1 | Fundamentos (auth + layouts) | 6 |
-| 2 | Catálogos (admin) | 9 |
-| 3 | Productos (admin) | 7 |
-| 4 | Descuentos (admin) | 4 |
-| 5 | Catálogo público | 7 |
-| 6 | SEO y Analytics | 6 |
-| 7 | Usuarios y configuración | 6 |
-| 8 | Pulido y despliegue | 8 |
-| **Total** | | **59** |
+| Fase | Descripción | Tareas | Completadas |
+|---|---|---|---|
+| 0 | Infraestructura | 6 | 6 |
+| 1 | Fundamentos (auth + layouts) | 6 | 6 |
+| 2 | Catálogos (admin) | 9 | 9 |
+| 3 | Productos (admin) | 7 | 7 |
+| 4 | Descuentos (admin) | 4 | 4 |
+| 5 | Catálogo público | 10 | 10 |
+| 6 | SEO y Analytics | 6 | 6 |
+| 7 | Usuarios y configuración | 6 | 2 |
+| 8 | Pulido y despliegue | 8 | 0 |
+| **Total** | | **62** | **50** |
