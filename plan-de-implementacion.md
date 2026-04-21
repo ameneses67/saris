@@ -137,7 +137,7 @@
 - [x] **7.1** Listado de usuarios — nombre, email, rol y fecha de creación
 - [x] **7.2** Crear nuevo usuario — email, nombre, contraseña temporal, rol (admin/editor)
 - [x] **7.3** Editar rol de usuario y restablecer contraseña
-- [ ] **7.4** Perfil propio — cambiar nombre y contraseña
+- [x] **7.4** Perfil propio — cambiar nombre y contraseña
 
 **Configuración del sitio**
 - [x] **7.5** Página de configuración — editar número de WhatsApp, nombre del sitio, dirección y horario (`/admin/configuracion`, solo rol admin)
@@ -174,6 +174,6 @@
 | 4 | Descuentos (admin) | 4 | 4 |
 | 5 | Catálogo público | 10 | 10 |
 | 6 | SEO y Analytics | 6 | 6 |
-| 7 | Usuarios y configuración | 6 | 5 |
+| 7 | Usuarios y configuración | 6 | 6 |
 | 8 | Pulido y despliegue | 8 | 0 |
-| **Total** | | **62** | **53** |
+| **Total** | | **62** | **54** |

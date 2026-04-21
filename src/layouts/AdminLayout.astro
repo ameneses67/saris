@@ -68,10 +68,13 @@ const pathname = new URL(Astro.request.url).pathname
           })}
         </nav>
         <div class="border-t border-gray-200 p-4">
-          <div class="mb-2 px-3">
-            <p class="text-sm font-medium text-gray-900">{user.name}</p>
-            <p class="text-xs text-gray-500 capitalize">{user.role}</p>
-          </div>
+          <a
+            href="/admin/perfil"
+            class="mb-1 flex flex-col rounded-lg px-3 py-2 transition-colors hover:bg-gray-50"
+          >
+            <span class="text-sm font-medium text-gray-900">{user.name}</span>
+            <span class="text-xs text-gray-500 capitalize">{user.role}</span>
+          </a>
           <button
             id="btn-logout"
             type="button"

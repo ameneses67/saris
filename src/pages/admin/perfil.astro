@@ -1,0 +1,168 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro'
+
+const user = Astro.locals.user!
+---
+
+<AdminLayout title="Mi perfil">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Mi perfil</h1>
+    <p class="mt-1 text-sm text-gray-500">Actualiza tu nombre y contraseña.</p>
+  </div>
+
+  <div class="max-w-lg space-y-6">
+    <!-- Nombre -->
+    <div class="rounded-xl border border-gray-200 bg-white">
+      <div class="border-b border-gray-100 px-6 py-4">
+        <h2 class="text-sm font-semibold text-gray-900">Información personal</h2>
+      </div>
+      <form id="form-name" class="px-6 py-5 space-y-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={user.name}
+            required
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            value={user.email}
+            disabled
+            class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+          />
+          <p class="mt-1 text-xs text-gray-400">El email no se puede cambiar.</p>
+        </div>
+        <div id="name-error" class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+        <div id="name-success" class="hidden rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+          Nombre actualizado.
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            id="btn-name"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          >
+            Guardar nombre
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="rounded-xl border border-gray-200 bg-white">
+      <div class="border-b border-gray-100 px-6 py-4">
+        <h2 class="text-sm font-semibold text-gray-900">Cambiar contraseña</h2>
+      </div>
+      <form id="form-password" class="px-6 py-5 space-y-4">
+        <div>
+          <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1">Contraseña actual</label>
+          <input
+            id="currentPassword"
+            name="currentPassword"
+            type="password"
+            required
+            autocomplete="current-password"
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
+          <input
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+            placeholder="Mínimo 8 caracteres"
+          />
+        </div>
+        <div id="pwd-error" class="hidden rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+        <div id="pwd-success" class="hidden rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+          Contraseña actualizada.
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            id="btn-pwd"
+            class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          >
+            Cambiar contraseña
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  async function submitForm(
+    formId: string,
+    btnId: string,
+    errorId: string,
+    successId: string,
+    buildPayload: (form: HTMLFormElement) => Record<string, string>,
+    onSuccess?: () => void,
+  ) {
+    const form = document.getElementById(formId) as HTMLFormElement
+    const btn = document.getElementById(btnId) as HTMLButtonElement
+    const errorEl = document.getElementById(errorId)!
+    const successEl = document.getElementById(successId)!
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      btn.disabled = true
+      errorEl.classList.add('hidden')
+      successEl.classList.add('hidden')
+
+      try {
+        const res = await fetch('/api/admin/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildPayload(form)),
+        })
+
+        const data = await res.json() as { error?: string }
+
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Error al guardar'
+          errorEl.classList.remove('hidden')
+          return
+        }
+
+        successEl.classList.remove('hidden')
+        onSuccess?.()
+      } catch {
+        errorEl.textContent = 'Error de conexión'
+        errorEl.classList.remove('hidden')
+      } finally {
+        btn.disabled = false
+      }
+    })
+  }
+
+  submitForm(
+    'form-name', 'btn-name', 'name-error', 'name-success',
+    (form) => ({
+      name: (form.elements.namedItem('name') as HTMLInputElement).value.trim(),
+    }),
+  )
+
+  submitForm(
+    'form-password', 'btn-pwd', 'pwd-error', 'pwd-success',
+    (form) => ({
+      currentPassword: (form.elements.namedItem('currentPassword') as HTMLInputElement).value,
+      newPassword: (form.elements.namedItem('newPassword') as HTMLInputElement).value,
+    }),
+    () => {
+      (document.getElementById('form-password') as HTMLFormElement).reset()
+    },
+  )
+</script>
