@@ -72,14 +72,23 @@ const pathname = new URL(Astro.request.url).pathname
             <p class="text-sm font-medium text-gray-900">{user.name}</p>
             <p class="text-xs text-gray-500 capitalize">{user.role}</p>
           </div>
-          <form method="POST" action="/api/auth/sign-out">
-            <button
-              type="submit"
-              class="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-            >
-              Cerrar sesión
-            </button>
-          </form>
+          <button
+            id="btn-logout"
+            type="button"
+            class="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+          >
+            Cerrar sesión
+          </button>
+          <script>
+            document.getElementById('btn-logout')?.addEventListener('click', async () => {
+              await fetch('/api/auth/sign-out', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: '{}',
+              })
+              window.location.href = '/login'
+            })
+          </script>
         </div>
       </aside>
 

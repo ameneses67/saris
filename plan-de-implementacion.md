@@ -134,9 +134,9 @@
 > Objetivo: el administrador puede gestionar quién tiene acceso y configurar datos globales del sitio.
 
 **Usuarios**
-- [ ] **7.1** Listado de usuarios — nombre, email, rol y fecha de creación
-- [ ] **7.2** Crear nuevo usuario — email, nombre, contraseña temporal, rol (admin/editor)
-- [ ] **7.3** Editar rol de usuario y restablecer contraseña
+- [x] **7.1** Listado de usuarios — nombre, email, rol y fecha de creación
+- [x] **7.2** Crear nuevo usuario — email, nombre, contraseña temporal, rol (admin/editor)
+- [x] **7.3** Editar rol de usuario y restablecer contraseña
 - [ ] **7.4** Perfil propio — cambiar nombre y contraseña
 
 **Configuración del sitio**
@@ -174,6 +174,6 @@
 | 4 | Descuentos (admin) | 4 | 4 |
 | 5 | Catálogo público | 10 | 10 |
 | 6 | SEO y Analytics | 6 | 6 |
-| 7 | Usuarios y configuración | 6 | 2 |
+| 7 | Usuarios y configuración | 6 | 5 |
 | 8 | Pulido y despliegue | 8 | 0 |
-| **Total** | | **62** | **50** |
+| **Total** | | **62** | **53** |

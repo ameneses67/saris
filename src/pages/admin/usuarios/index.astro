@@ -1,0 +1,31 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro'
+import { getDb } from '../../../db'
+import { user } from '../../../db/schema'
+import UsersManager from '../../../components/admin/UsersManager'
+
+// Solo administradores pueden acceder
+if (Astro.locals.user?.role !== 'admin') {
+  return Astro.redirect('/admin')
+}
+
+const db = getDb()
+const users = await db
+  .select({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    createdAt: user.createdAt,
+  })
+  .from(user)
+  .orderBy(user.createdAt)
+---
+
+<AdminLayout title="Usuarios">
+  <UsersManager
+    client:load
+    initialUsers={users}
+    currentUserId={Astro.locals.user!.id}
+  />
+</AdminLayout>
