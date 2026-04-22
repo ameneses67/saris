@@ -223,8 +223,8 @@ export default function CategoriesManager({ initialCategories }: Props) {
                 <th className="px-4 py-3 w-12" />
                 <th className="px-4 py-3 text-left font-medium text-gray-600">Nombre</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-600 hidden md:table-cell">Slug</th>
-                <th className="px-4 py-3 text-center font-medium text-gray-600 w-20">Orden</th>
-                <th className="px-4 py-3 w-24" />
+                <th className="px-4 py-3 text-center font-medium text-gray-600 w-20 hidden sm:table-cell">Orden</th>
+                <th className="px-4 py-3 w-24 hidden sm:table-cell" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -252,10 +252,31 @@ export default function CategoriesManager({ initialCategories }: Props) {
                     {category.description && (
                       <p className="text-xs text-gray-400 truncate max-w-xs">{category.description}</p>
                     )}
+                    {/* Acciones en móvil */}
+                    <div className="mt-1.5 flex items-center gap-1 sm:hidden">
+                      <button
+                        onClick={() => openEdit(category)}
+                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                        title="Editar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(category)}
+                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600 transition-colors"
+                        title="Eliminar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-gray-500 font-mono text-xs hidden md:table-cell">{category.slug}</td>
-                  <td className="px-4 py-3 text-center text-gray-500">{category.sortOrder}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 text-center text-gray-500 hidden sm:table-cell">{category.sortOrder}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEdit(category)}

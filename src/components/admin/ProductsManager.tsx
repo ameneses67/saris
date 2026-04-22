@@ -412,9 +412,9 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                   <th className="px-4 py-3 text-left font-medium text-gray-600">Nombre</th>
                   <th className="px-4 py-3 text-left font-medium text-gray-600 hidden md:table-cell">Categoría</th>
                   <th className="px-4 py-3 text-left font-medium text-gray-600 hidden lg:table-cell">Marca</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">Precio base</th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-600 w-28">Estado</th>
-                  <th className="px-4 py-3 w-20" />
+                  <th className="px-4 py-3 text-right font-medium text-gray-600 hidden sm:table-cell">Precio base</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-600 w-28 hidden sm:table-cell">Estado</th>
+                  <th className="px-4 py-3 w-20 hidden sm:table-cell" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -439,22 +439,63 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900">{product.name}</p>
-                        {product.featured && (
-                          <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                            Destacado
-                          </span>
-                        )}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium text-gray-900">{product.name}</p>
+                            {product.featured && (
+                              <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                                Destacado
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400 font-mono">{product.slug}</p>
+                          {/* Precio + estado + acciones en móvil */}
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:hidden">
+                            <span className="text-sm font-medium text-gray-900 tabular-nums">
+                              {product.discountedPrice !== null
+                                ? MXN.format(product.discountedPrice / 100)
+                                : MXN.format(product.basePrice / 100)}
+                            </span>
+                            <button
+                              onClick={() => handleToggleStatus(product)}
+                              disabled={togglingId === product.id}
+                              className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                                product.status === 'active'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}
+                            >
+                              {togglingId === product.id ? '…' : product.status === 'active' ? 'Activo' : 'Inactivo'}
+                            </button>
+                            <a
+                              href={`/admin/productos/${product.id}`}
+                              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                              title="Editar"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </a>
+                            <button
+                              onClick={() => setDeleteTarget(product)}
+                              className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600 transition-colors"
+                              title="Eliminar"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-400 font-mono">{product.slug}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
                       <p>{product.categoryName ?? '—'}</p>
                       <p className="text-xs text-gray-400">{product.subcategoryName ?? ''}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 hidden lg:table-cell">{product.brandName ?? '—'}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="px-4 py-3 text-right tabular-nums hidden sm:table-cell">
                       {product.discountedPrice !== null ? (
                         <>
                           <span className="block text-xs text-gray-400 line-through">
@@ -470,8 +511,8 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                         </span>
                       )}
                     </td>
-                    {/* Toggle estado (3.6) */}
-                    <td className="px-4 py-3 text-center">
+                    {/* Toggle estado */}
+                    <td className="px-4 py-3 text-center hidden sm:table-cell">
                       <button
                         onClick={() => handleToggleStatus(product)}
                         disabled={togglingId === product.id}
@@ -485,7 +526,7 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                         {togglingId === product.id ? '…' : product.status === 'active' ? 'Activo' : 'Inactivo'}
                       </button>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 hidden sm:table-cell">
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={`/admin/productos/${product.id}`}
