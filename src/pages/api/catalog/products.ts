@@ -64,6 +64,7 @@ export const GET: APIRoute = async ({ url }) => {
         brandName: brands.name,
         basePrice: products.basePrice,
         mainPhotoKey: productPhotos.r2Key,
+        mainThumbKey: productPhotos.thumbKey,
       })
       .from(products)
       .leftJoin(brands, eq(products.brandId, brands.id))

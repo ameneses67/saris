@@ -45,6 +45,15 @@ interface Props {
   initialSettings: Setting[]
 }
 
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  )
+}
+
 export default function SettingsManager({ initialSettings }: Props) {
   // Construir mapa inicial con los valores de la DB
   const buildValues = () => {
@@ -134,7 +143,7 @@ export default function SettingsManager({ initialSettings }: Props) {
           disabled={saving}
           className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
         >
-          {saving ? 'Guardando…' : 'Guardar cambios'}
+          {saving ? <span className="inline-flex items-center gap-2"><Spinner />Guardando…</span> : 'Guardar cambios'}
         </button>
         {success && (
           <span className="text-sm text-green-700 font-medium">Cambios guardados</span>

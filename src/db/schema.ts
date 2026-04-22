@@ -70,6 +70,8 @@ export const productPhotos = sqliteTable('product_photos', {
   productId: text('product_id').notNull().references(() => products.id, { onDelete: 'cascade' }),
   // Clave del objeto en Cloudflare R2
   r2Key: text('r2_key').notNull(),
+  // Miniatura generada al subir (null para fotos anteriores a Fase 8)
+  thumbKey: text('thumb_key'),
   altText: text('alt_text'),
   // La foto con sortOrder = 0 es la principal
   sortOrder: integer('sort_order').notNull().default(0),

@@ -25,6 +25,15 @@ interface ModalState {
   subcategory: Subcategory | null
 }
 
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  )
+}
+
 export default function SubcategoriesManager({ initialSubcategories, categories }: Props) {
   const [subcategories, setSubcategories] = useState<Subcategory[]>(initialSubcategories)
   const [modal, setModal] = useState<ModalState>({ open: false, subcategory: null })
@@ -254,19 +263,21 @@ export default function SubcategoriesManager({ initialSubcategories, categories 
                   {subs.map((sub) => (
                     <tr key={sub.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 w-12">
-                        {sub.photoKey ? (
-                          <img
-                            src={`/api/media/${sub.photoKey}`}
-                            alt={sub.name}
-                            className="h-10 w-10 rounded-md object-cover bg-gray-100"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
+                        <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
+                          {sub.photoKey ? (
+                            <img
+                              src={`/api/media/${sub.photoKey}`}
+                              alt={sub.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-gray-900">{sub.name}</p>
@@ -431,7 +442,7 @@ export default function SubcategoriesManager({ initialSubcategories, categories 
                   disabled={loading}
                   className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
-                  {loading ? 'Guardando…' : 'Guardar'}
+                  {loading ? <span className="inline-flex items-center gap-2"><Spinner />Guardando…</span> : 'Guardar'}
                 </button>
               </div>
             </form>
@@ -519,7 +530,7 @@ export default function SubcategoriesManager({ initialSubcategories, categories 
                 disabled={loading}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
-                {loading ? 'Eliminando…' : 'Eliminar'}
+                {loading ? <span className="inline-flex items-center gap-2"><Spinner />Eliminando…</span> : 'Eliminar'}
               </button>
             </div>
           </div>

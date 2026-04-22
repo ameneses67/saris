@@ -10,6 +10,7 @@ interface CatalogProduct {
   basePrice: number
   discountedPrice: number | null
   mainPhotoKey: string | null
+  mainThumbKey: string | null
 }
 
 interface FilterOption { id: string; name: string }
@@ -99,7 +100,7 @@ function ProductCard({
       <div className="aspect-[3/4] w-full overflow-hidden bg-gray-100">
         {product.mainPhotoKey ? (
           <img
-            src={`/api/media/${product.mainPhotoKey}`}
+            src={`/api/media/${product.mainThumbKey ?? product.mainPhotoKey}`}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"

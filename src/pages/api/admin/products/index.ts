@@ -23,6 +23,7 @@ export const GET: APIRoute = async () => {
       status: products.status,
       createdAt: products.createdAt,
       mainPhotoKey: productPhotos.r2Key,
+      mainThumbKey: productPhotos.thumbKey,
     })
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))

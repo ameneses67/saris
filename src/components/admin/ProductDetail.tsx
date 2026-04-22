@@ -1,6 +1,19 @@
 import { useState, useMemo, useRef } from 'react'
 
 // ---------------------------------------------------------------------------
+// Spinner
+// ---------------------------------------------------------------------------
+
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -146,6 +159,40 @@ export default function ProductDetail({
   const [photoError, setPhotoError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  /** Redimensiona una imagen a max 400 × 533 px (proporción 3:4) usando Canvas */
+  async function generateThumb(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const THUMB_W = 400
+        const THUMB_H = 533
+        const srcRatio = img.width / img.height
+        const dstRatio = THUMB_W / THUMB_H
+        let sx = 0, sy = 0, sw = img.width, sh = img.height
+        if (srcRatio > dstRatio) {
+          sw = img.height * dstRatio
+          sx = (img.width - sw) / 2
+        } else {
+          sh = img.width / dstRatio
+          sy = (img.height - sh) / 2
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = THUMB_W
+        canvas.height = THUMB_H
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, THUMB_W, THUMB_H)
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('No se pudo generar la miniatura'))
+        }, 'image/jpeg', 0.82)
+      }
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagen inválida')) }
+      img.src = url
+    })
+  }
+
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -154,6 +201,13 @@ export default function ProductDetail({
 
     const formData = new FormData()
     formData.append('file', file)
+
+    try {
+      const thumb = await generateThumb(file)
+      formData.append('thumb', thumb, 'thumb.jpg')
+    } catch {
+      // Si falla el thumbnail, continúa con solo la imagen original
+    }
 
     try {
       const res = await fetch(`/api/admin/products/${product.id}/photos`, {
@@ -457,7 +511,7 @@ export default function ProductDetail({
               type="submit" disabled={infoLoading}
               className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
-              {infoLoading ? 'Guardando…' : 'Guardar cambios'}
+              {infoLoading ? <span className="inline-flex items-center gap-2"><Spinner />Guardando…</span> : 'Guardar cambios'}
             </button>
           </div>
         </form>
@@ -476,7 +530,7 @@ export default function ProductDetail({
             title={photos.length >= 3 ? 'Máximo 3 fotos por producto' : undefined}
             className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {uploadLoading ? 'Subiendo…' : photos.length >= 3 ? 'Máx. 3 fotos' : '+ Subir foto'}
+            {uploadLoading ? <span className="inline-flex items-center gap-2"><Spinner />Subiendo…</span> : photos.length >= 3 ? 'Máx. 3 fotos' : '+ Subir foto'}
           </button>
           <input
             ref={fileInputRef}
@@ -677,7 +731,7 @@ export default function ProductDetail({
                   type="submit" disabled={variantLoading}
                   className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
-                  {variantLoading ? 'Guardando…' : 'Guardar'}
+                  {variantLoading ? <span className="inline-flex items-center gap-2"><Spinner />Guardando…</span> : 'Guardar'}
                 </button>
               </div>
             </form>
@@ -709,7 +763,7 @@ export default function ProductDetail({
                 disabled={variantLoading}
                 className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
-                {variantLoading ? 'Eliminando…' : 'Eliminar'}
+                {variantLoading ? <span className="inline-flex items-center gap-2"><Spinner />Eliminando…</span> : 'Eliminar'}
               </button>
             </div>
           </div>
@@ -747,7 +801,7 @@ function VariantForm({ onSubmit, onCancel, loading, basePrice }: VariantFormProp
             type="submit" disabled={loading}
             className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Guardando…' : 'Agregar'}
+            {loading ? <span className="inline-flex items-center gap-2"><Spinner />Guardando…</span> : 'Agregar'}
           </button>
         </div>
       </form>

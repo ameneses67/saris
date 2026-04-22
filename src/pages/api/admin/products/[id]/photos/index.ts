@@ -32,6 +32,7 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   const formData = await request.formData()
   const file = formData.get('file') as File | null
+  const thumbFile = formData.get('thumb') as File | null
 
   if (!file) return Response.json({ error: 'No se recibió archivo' }, { status: 400 })
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -53,9 +54,19 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   const nextOrder = (agg?.maxOrder ?? -1) + 1
 
+  // Subir imagen original a R2
   await env.R2.put(r2Key, await file.arrayBuffer(), {
     httpMetadata: { contentType: file.type },
   })
+
+  // Subir miniatura si se recibió
+  let thumbKey: string | null = null
+  if (thumbFile && thumbFile.size > 0) {
+    thumbKey = `products/${productId}/${photoId}_thumb.jpg`
+    await env.R2.put(thumbKey, await thumbFile.arrayBuffer(), {
+      httpMetadata: { contentType: 'image/jpeg' },
+    })
+  }
 
   const [photo] = await db
     .insert(productPhotos)
@@ -63,6 +74,7 @@ export const POST: APIRoute = async ({ params, request }) => {
       id: photoId,
       productId: productId!,
       r2Key,
+      thumbKey,
       altText: null,
       sortOrder: nextOrder,
     })

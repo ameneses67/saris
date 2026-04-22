@@ -150,10 +150,10 @@
 > Objetivo: la aplicación lista para uso real con dominio propio.
 
 **Calidad y UX**
-- [ ] **8.1** Estados de carga — skeletons en el catálogo, spinners en formularios del admin
-- [ ] **8.2** Manejo de errores — páginas 404 y 500, mensajes de error claros en formularios
+- [x] **8.1** Estados de carga — skeletons en el catálogo, spinners en formularios del admin
+- [x] **8.2** Manejo de errores — páginas 404 y 500, mensajes de error claros en formularios
 - [ ] **8.3** Revisión responsive — probar catálogo y admin en móvil (iOS y Android)
-- [ ] **8.4** Optimización de imágenes — generar miniatura (thumbnail) al subir a R2 para usar en listados; imagen completa solo en detalle
+- [x] **8.4** Optimización de imágenes — generar miniatura (thumbnail) al subir a R2 para usar en listados; imagen completa solo en detalle
 
 **Despliegue**
 - [ ] **8.5** Configurar variables de entorno (`secrets`) en Cloudflare Pages para producción
@@ -175,5 +175,5 @@
 | 5 | Catálogo público | 10 | 10 |
 | 6 | SEO y Analytics | 6 | 6 |
 | 7 | Usuarios y configuración | 6 | 6 |
-| 8 | Pulido y despliegue | 8 | 0 |
-| **Total** | | **62** | **54** |
+| 8 | Pulido y despliegue | 8 | 3 |
+| **Total** | | **62** | **57** |

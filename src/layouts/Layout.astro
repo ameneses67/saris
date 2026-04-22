@@ -3,6 +3,7 @@ import '../styles/global.css'
 import { inArray } from 'drizzle-orm'
 import { getDb } from '../db'
 import { settings } from '../db/schema'
+import { getAuth } from '../lib/auth'
 
 interface Props {
   title?: string
@@ -16,10 +17,13 @@ interface Props {
 const { title = 'Saris', description = 'Catálogo de productos', ogImage, ogUrl } = Astro.props
 
 const db = getDb()
-const siteSettings = await db
-  .select({ key: settings.key, value: settings.value })
-  .from(settings)
-  .where(inArray(settings.key, ['site_name', 'ga_measurement_id']))
+const [siteSettings, session] = await Promise.all([
+  db
+    .select({ key: settings.key, value: settings.value })
+    .from(settings)
+    .where(inArray(settings.key, ['site_name', 'ga_measurement_id'])),
+  getAuth().api.getSession({ headers: Astro.request.headers }).catch(() => null),
+])
 
 const siteName = siteSettings.find((s) => s.key === 'site_name')?.value || 'Saris'
 const gaId     = siteSettings.find((s) => s.key === 'ga_measurement_id')?.value || ''
@@ -70,6 +74,9 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
           <a href="/" class="text-xl font-bold tracking-tight">{siteName}</a>
           <nav class="flex items-center gap-4 text-sm">
             <a href="/catalogo" class="text-gray-600 hover:text-gray-900 transition-colors">Catálogo</a>
+            {session && (
+              <a href="/admin" class="text-gray-600 hover:text-gray-900 transition-colors">Admin</a>
+            )}
           </nav>
         </div>
       </div>
