@@ -152,14 +152,14 @@
 **Calidad y UX**
 - [x] **8.1** Estados de carga — skeletons en el catálogo, spinners en formularios del admin
 - [x] **8.2** Manejo de errores — páginas 404 y 500, mensajes de error claros en formularios
-- [ ] **8.3** Revisión responsive — probar catálogo y admin en móvil (iOS y Android)
+- [x] **8.3** Revisión responsive — probar catálogo y admin en móvil (iOS y Android)
 - [x] **8.4** Optimización de imágenes — generar miniatura (thumbnail) al subir a R2 para usar en listados; imagen completa solo en detalle
 
 **Despliegue**
-- [ ] **8.5** Configurar variables de entorno (`secrets`) en Cloudflare Pages para producción
-- [ ] **8.6** Configurar dominio personalizado (`saris.mx` o `saris.store`) en Cloudflare Pages
-- [ ] **8.7** Verificar que las migraciones de D1 se aplicaron en producción
-- [ ] **8.8** Prueba de extremo a extremo en producción — crear producto, verlo en catálogo, compartir por WhatsApp
+- [x] **8.5** Configurar variables de entorno (`secrets`) en Cloudflare Pages para producción
+- [x] **8.6** Configurar dominio personalizado (`saris.mx` o `saris.store`) en Cloudflare Pages
+- [x] **8.7** Verificar que las migraciones de D1 se aplicaron en producción
+- [x] **8.8** Prueba de extremo a extremo en producción — crear producto, verlo en catálogo, compartir por WhatsApp
 
 ---
 
@@ -175,5 +175,5 @@
 | 5 | Catálogo público | 10 | 10 |
 | 6 | SEO y Analytics | 6 | 6 |
 | 7 | Usuarios y configuración | 6 | 6 |
-| 8 | Pulido y despliegue | 8 | 3 |
-| **Total** | | **62** | **57** |
+| 8 | Pulido y despliegue | 8 | 8 |
+| **Total** | | **62** | **62** |
