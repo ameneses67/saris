@@ -385,7 +385,7 @@ export default function ProductDetail({
       <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
         <a href="/admin/productos" className="hover:text-gray-900 transition-colors">Productos</a>
         <span>/</span>
-        <span className="text-gray-900 font-medium truncate">{product.name}</span>
+        <span className="text-gray-900 font-medium break-words">{product.name}</span>
       </div>
 
       {/* ── Sección: Información básica ─────────────────────────────────── */}

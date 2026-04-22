@@ -442,7 +442,7 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium text-gray-900">{product.name}</p>
+                            <p className="font-medium text-gray-900 break-words">{product.name}</p>
                             {product.featured && (
                               <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                                 Destacado

@@ -280,9 +280,9 @@ export default function SubcategoriesManager({ initialSubcategories, categories 
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900">{sub.name}</p>
+                        <p className="font-medium text-gray-900 break-words">{sub.name}</p>
                         {sub.description && (
-                          <p className="text-xs text-gray-400 truncate max-w-xs">{sub.description}</p>
+                          <p className="text-xs text-gray-400 break-words">{sub.description}</p>
                         )}
                         {/* Acciones en móvil */}
                         <div className="mt-1.5 flex items-center gap-1 sm:hidden">

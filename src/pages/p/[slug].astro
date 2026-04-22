@@ -131,7 +131,7 @@ const jsonLd = {
       {product.brandName && (
         <p class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-400">{product.brandName}</p>
       )}
-      <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{product.name}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl break-words">{product.name}</h1>
     </div>
 
     {/* Galería interactiva + variantes + precio + WhatsApp */}
@@ -149,7 +149,7 @@ const jsonLd = {
     {product.description && (
       <div class="mt-10 border-t border-gray-100 pt-8">
         <h2 class="mb-3 text-base font-semibold text-gray-900">Descripción</h2>
-        <p class="whitespace-pre-line text-sm leading-relaxed text-gray-600">{product.description}</p>
+        <p class="whitespace-pre-line break-words text-sm leading-relaxed text-gray-600">{product.description}</p>
       </div>
     )}
   </div>

@@ -248,9 +248,9 @@ export default function CategoriesManager({ initialCategories }: Props) {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{category.name}</p>
+                    <p className="font-medium text-gray-900 break-words">{category.name}</p>
                     {category.description && (
-                      <p className="text-xs text-gray-400 truncate max-w-xs">{category.description}</p>
+                      <p className="text-xs text-gray-400 break-words">{category.description}</p>
                     )}
                     {/* Acciones en móvil */}
                     <div className="mt-1.5 flex items-center gap-1 sm:hidden">

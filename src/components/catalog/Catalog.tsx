@@ -121,7 +121,7 @@ function ProductCard({
             {product.brandName}
           </p>
         )}
-        <p className="mb-2 text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
+        <p className="mb-2 text-sm font-medium text-gray-900 line-clamp-2 leading-snug break-words">
           {product.name}
         </p>
 
