@@ -48,6 +48,12 @@ export const POST: APIRoute = async ({ request }) => {
     basePrice: number
     featured?: boolean
     status?: 'active' | 'inactive'
+    variants?: Array<{
+      color?: string
+      size?: string
+      priceOverride?: number | null
+      status?: 'active' | 'inactive'
+    }>
   }
 
   if (!body.name?.trim()) return Response.json({ error: 'El nombre es requerido' }, { status: 400 })
@@ -88,15 +94,33 @@ export const POST: APIRoute = async ({ request }) => {
     })
     .returning()
 
-  // Crear variante default automáticamente
-  await db.insert(productVariants).values({
-    id: crypto.randomUUID(),
-    productId,
-    color: null,
-    size: null,
-    priceOverride: null,
-    status: 'active',
-  })
+  // Crear variantes: las explícitas del payload o una default vacía
+  const explicitVariants = (body.variants ?? []).filter(
+    (v) => v.color?.trim() || v.size?.trim()
+  )
+  if (explicitVariants.length > 0) {
+    for (const v of explicitVariants) {
+      await db.insert(productVariants).values({
+        id: crypto.randomUUID(),
+        productId,
+        color: v.color?.trim() || null,
+        size: v.size?.trim() || null,
+        priceOverride: v.priceOverride != null && v.priceOverride > 0
+          ? Math.round(v.priceOverride)
+          : null,
+        status: v.status ?? 'active',
+      })
+    }
+  } else {
+    await db.insert(productVariants).values({
+      id: crypto.randomUUID(),
+      productId,
+      color: null,
+      size: null,
+      priceOverride: null,
+      status: 'active',
+    })
+  }
 
   return Response.json(product, { status: 201 })
 }

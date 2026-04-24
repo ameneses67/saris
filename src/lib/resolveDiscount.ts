@@ -41,8 +41,8 @@ export function resolveDiscount(
 
   for (const d of activeDiscounts) {
     if (!d.active) continue
-    if (d.startDate && d.startDate > now) continue
-    if (d.endDate && d.endDate + 86_400_000 <= now) continue
+    if (d.startDate && d.startDate.getTime() > now) continue
+    if (d.endDate && d.endDate.getTime() + 86_400_000 <= now) continue
 
     // Verificar si el descuento aplica a este producto/variante
     const applies = (() => {

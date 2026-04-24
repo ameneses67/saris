@@ -36,10 +36,15 @@ export default function CategoriesManager({ initialCategories }: Props) {
   const [photoLoading, setPhotoLoading] = useState(false)
   const [photoError, setPhotoError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const createPhotoRef = useRef<HTMLInputElement>(null)
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null)
 
   function openCreate() {
     setError('')
     setPhotoError('')
+    setPendingPhoto(null)
+    setPendingPreview(null)
     setModal({ open: true, category: null })
   }
 
@@ -50,9 +55,27 @@ export default function CategoriesManager({ initialCategories }: Props) {
   }
 
   function closeModal() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
     setModal({ open: false, category: null })
     setError('')
     setPhotoError('')
+    setPendingPhoto(null)
+    setPendingPreview(null)
+  }
+
+  function handleCreatePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
+    setPendingPhoto(file)
+    setPendingPreview(URL.createObjectURL(file))
+    if (createPhotoRef.current) createPhotoRef.current.value = ''
+  }
+
+  function clearPendingPhoto() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
+    setPendingPhoto(null)
+    setPendingPreview(null)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -84,7 +107,14 @@ export default function CategoriesManager({ initialCategories }: Props) {
         return
       }
 
-      const saved: Category = await res.json()
+      let saved: Category = await res.json()
+
+      if (!isEdit && pendingPhoto) {
+        const fd = new FormData()
+        fd.append('file', pendingPhoto)
+        const photoRes = await fetch(`/api/admin/categories/${saved.id}/photo`, { method: 'PUT', body: fd })
+        if (photoRes.ok) saved = await photoRes.json()
+      }
 
       if (isEdit) {
         setCategories((prev) => prev.map((c) => (c.id === saved.id ? saved : c)))
@@ -363,6 +393,40 @@ export default function CategoriesManager({ initialCategories }: Props) {
                 />
                 <p className="mt-1 text-xs text-gray-400">Número menor = aparece primero</p>
               </div>
+              {/* Foto — en creación se sube junto al formulario */}
+              {!modal.category && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Foto representativa <span className="font-normal text-gray-400">(opcional)</span>
+                  </label>
+                  {pendingPreview ? (
+                    <div className="flex items-start gap-3">
+                      <img src={pendingPreview} alt="preview" className="h-20 w-20 rounded-lg object-cover border border-gray-200" />
+                      <div className="flex flex-col gap-2">
+                        <button type="button" onClick={() => createPhotoRef.current?.click()}
+                          className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                          Cambiar
+                        </button>
+                        <button type="button" onClick={clearPendingPhoto}
+                          className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => createPhotoRef.current?.click()}
+                      className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors w-full justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Subir foto
+                    </button>
+                  )}
+                  <input ref={createPhotoRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleCreatePhotoSelect} />
+                  <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP o AVIF. Máx. 5 MB.</p>
+                </div>
+              )}
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -381,7 +445,7 @@ export default function CategoriesManager({ initialCategories }: Props) {
               </div>
             </form>
 
-            {/* Foto — solo disponible en modo edición (necesitamos el ID) */}
+            {/* Foto — solo disponible en modo edición */}
             {modal.category && (
               <div className="border-t border-gray-200 px-6 py-4">
                 <p className="text-sm font-medium text-gray-700 mb-3">Foto representativa</p>

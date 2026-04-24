@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -27,6 +27,14 @@ interface Product {
 }
 
 interface VariantSummary { productId: string; color: string | null; size: string | null }
+
+interface NewVariant {
+  _key: string
+  color: string
+  size: string
+  priceOverride: string
+  status: 'active' | 'inactive'
+}
 
 interface Props {
   initialProducts: Product[]
@@ -81,6 +89,10 @@ export default function ProductsManager({ initialProducts, categories, subcatego
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState('')
+  const [newVariants, setNewVariants] = useState<NewVariant[]>([])
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null)
+  const createPhotoRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -171,14 +183,79 @@ export default function ProductsManager({ initialProducts, categories, subcatego
     setError('')
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
+    setNewVariants([])
+    setPendingPhoto(null)
+    setPendingPreview(null)
     setModalOpen(true)
   }
 
   function closeModal() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
     setModalOpen(false)
     setSelectedCategoryId('')
     setSelectedSubcategoryId('')
+    setNewVariants([])
+    setPendingPhoto(null)
+    setPendingPreview(null)
     setError('')
+  }
+
+  function handleCreatePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
+    setPendingPhoto(file)
+    setPendingPreview(URL.createObjectURL(file))
+    if (createPhotoRef.current) createPhotoRef.current.value = ''
+  }
+
+  function clearPendingPhoto() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview)
+    setPendingPhoto(null)
+    setPendingPreview(null)
+  }
+
+  async function generateThumb(file: File): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const THUMB_W = 400, THUMB_H = 533
+        const srcRatio = img.width / img.height
+        const dstRatio = THUMB_W / THUMB_H
+        let sx = 0, sy = 0, sw = img.width, sh = img.height
+        if (srcRatio > dstRatio) { sw = img.height * dstRatio; sx = (img.width - sw) / 2 }
+        else { sh = img.width / dstRatio; sy = (img.height - sh) / 2 }
+        const canvas = document.createElement('canvas')
+        canvas.width = THUMB_W; canvas.height = THUMB_H
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, THUMB_W, THUMB_H)
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('No se pudo generar la miniatura'))
+        }, 'image/jpeg', 0.82)
+      }
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagen inválida')) }
+      img.src = url
+    })
+  }
+
+  function addVariantRow() {
+    setNewVariants((prev) => [
+      ...prev,
+      { _key: crypto.randomUUID(), color: '', size: '', priceOverride: '', status: 'active' },
+    ])
+  }
+
+  function removeVariantRow(key: string) {
+    setNewVariants((prev) => prev.filter((v) => v._key !== key))
+  }
+
+  function updateVariantRow(key: string, field: keyof Omit<NewVariant, '_key'>, value: string) {
+    setNewVariants((prev) =>
+      prev.map((v) => v._key === key ? { ...v, [field]: value } : v)
+    )
   }
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
@@ -195,6 +272,15 @@ export default function ProductsManager({ initialProducts, categories, subcatego
     const status = (form.elements.namedItem('status') as unknown as HTMLSelectElement).value as 'active' | 'inactive'
 
     try {
+      const variants = newVariants
+        .filter((v) => v.color.trim() || v.size.trim())
+        .map((v) => ({
+          color: v.color.trim() || undefined,
+          size: v.size.trim() || undefined,
+          priceOverride: v.priceOverride ? displayToCentavos(v.priceOverride) : null,
+          status: v.status,
+        }))
+
       const res = await fetch('/api/admin/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -206,6 +292,7 @@ export default function ProductsManager({ initialProducts, categories, subcatego
           brandId,
           basePrice,
           status,
+          variants,
         }),
       })
 
@@ -220,8 +307,23 @@ export default function ProductsManager({ initialProducts, categories, subcatego
       const subName = subcategories.find((s) => s.id === saved.subcategoryId)?.name ?? null
       const brandName = brands.find((b) => b.id === saved.brandId)?.name ?? null
 
+      let mainPhotoKey: string | null = null
+      if (pendingPhoto) {
+        const fd = new FormData()
+        fd.append('file', pendingPhoto)
+        try {
+          const thumb = await generateThumb(pendingPhoto)
+          fd.append('thumb', thumb, 'thumb.jpg')
+        } catch { /* continuar sin miniatura */ }
+        const photoRes = await fetch(`/api/admin/products/${saved.id}/photos`, { method: 'POST', body: fd })
+        if (photoRes.ok) {
+          const photo = await photoRes.json() as { r2Key: string }
+          mainPhotoKey = photo.r2Key
+        }
+      }
+
       setProductList((prev) => [
-        { ...saved, categoryName: catName, subcategoryName: subName, brandName: brandName, mainPhotoKey: null, discountedPrice: null, featured: false },
+        { ...saved, categoryName: catName, subcategoryName: subName, brandName: brandName, mainPhotoKey, discountedPrice: null, featured: false },
         ...prev,
       ])
       closeModal()
@@ -671,7 +773,136 @@ export default function ProductsManager({ initialProducts, categories, subcatego
                   </select>
                 </div>
               </div>
-              <p className="text-xs text-gray-400">Después de crear el producto podrás agregar fotos y variantes.</p>
+              {/* Foto principal */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Foto principal <span className="font-normal text-gray-400">(opcional)</span>
+                </label>
+                {pendingPreview ? (
+                  <div className="flex items-start gap-3">
+                    <img src={pendingPreview} alt="preview" className="h-20 w-20 rounded-lg object-cover border border-gray-200" />
+                    <div className="flex flex-col gap-2">
+                      <button type="button" onClick={() => createPhotoRef.current?.click()}
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        Cambiar
+                      </button>
+                      <button type="button" onClick={clearPendingPhoto}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+                        Quitar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => createPhotoRef.current?.click()}
+                    className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors w-full justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Subir foto
+                  </button>
+                )}
+                <input ref={createPhotoRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={handleCreatePhotoSelect} />
+                <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP o AVIF. Máx. 5 MB.</p>
+              </div>
+
+              {/* Sección variantes */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-gray-700">Variantes</span>
+                  <span className="text-xs text-gray-400">(opcional)</span>
+                </div>
+
+                {newVariants.length > 0 && (
+                  <div className="mb-2 overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs text-gray-500">
+                          <th className="pb-1 pr-2 font-medium">Color</th>
+                          <th className="pb-1 pr-2 font-medium">Talla</th>
+                          <th className="pb-1 pr-2 font-medium">Precio</th>
+                          <th className="pb-1 font-medium">Estado</th>
+                          <th className="pb-1" />
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {newVariants.map((v) => (
+                          <tr key={v._key}>
+                            <td className="py-1 pr-2">
+                              <input
+                                type="text"
+                                value={v.color}
+                                onChange={(e) => updateVariantRow(v._key, 'color', e.target.value)}
+                                placeholder="Ej. Rojo"
+                                className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                              />
+                            </td>
+                            <td className="py-1 pr-2">
+                              <input
+                                type="text"
+                                value={v.size}
+                                onChange={(e) => updateVariantRow(v._key, 'size', e.target.value)}
+                                placeholder="Ej. M"
+                                className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                              />
+                            </td>
+                            <td className="py-1 pr-2">
+                              <div className="relative">
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  value={v.priceOverride}
+                                  onChange={(e) => updateVariantRow(v._key, 'priceOverride', e.target.value)}
+                                  placeholder="Base"
+                                  className="w-full rounded border border-gray-300 pl-5 pr-2 py-1 text-xs focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                                />
+                              </div>
+                            </td>
+                            <td className="py-1 pr-2">
+                              <select
+                                value={v.status}
+                                onChange={(e) => updateVariantRow(v._key, 'status', e.target.value)}
+                                className="rounded border border-gray-300 px-2 py-1 text-xs focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                              >
+                                <option value="active">Activo</option>
+                                <option value="inactive">Inactivo</option>
+                              </select>
+                            </td>
+                            <td className="py-1">
+                              <button
+                                type="button"
+                                onClick={() => removeVariantRow(v._key)}
+                                className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                title="Eliminar variante"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={addVariantRow}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  Agregar variante
+                </button>
+                {newVariants.length === 0 && (
+                  <p className="mt-1 text-xs text-gray-400">Si no agregas variantes, se creará una variante genérica automáticamente.</p>
+                )}
+              </div>
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button" onClick={closeModal}
