@@ -34,10 +34,10 @@ const KNOWN_SETTINGS: { key: string; label: string; description: string; placeho
     multiline: true,
   },
   {
-    key: 'ga_measurement_id',
-    label: 'ID de Google Analytics (GA4)',
-    description: 'Measurement ID de GA4. Si se configura, se activa el seguimiento automáticamente. Ej: G-XXXXXXXXXX',
-    placeholder: 'G-XXXXXXXXXX',
+    key: 'gtm_container_id',
+    label: 'ID de Google Tag Manager',
+    description: 'Container ID de GTM. Si se configura, se activa automáticamente. Ej: GTM-XXXXXXX',
+    placeholder: 'GTM-XXXXXXX',
   },
 ]
 

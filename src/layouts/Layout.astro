@@ -21,12 +21,12 @@ const [siteSettings, session] = await Promise.all([
   db
     .select({ key: settings.key, value: settings.value })
     .from(settings)
-    .where(inArray(settings.key, ['site_name', 'ga_measurement_id'])),
+    .where(inArray(settings.key, ['site_name', 'gtm_container_id'])),
   getAuth().api.getSession({ headers: Astro.request.headers }).catch(() => null),
 ])
 
 const siteName = siteSettings.find((s) => s.key === 'site_name')?.value || 'Saris'
-const gaId     = siteSettings.find((s) => s.key === 'ga_measurement_id')?.value || ''
+const gtmId    = siteSettings.find((s) => s.key === 'gtm_container_id')?.value || ''
 
 const canonical = ogUrl ?? Astro.url.href
 const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
@@ -54,20 +54,25 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
     <!-- Slot para meta tags adicionales (ej. JSON-LD, og:type=product) -->
     <slot name="head" />
 
-    <!-- Google Analytics -->
-    {gaId && (
-      <>
-        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
-        <script is:inline define:vars={{ gaId }}>
-          window.dataLayer = window.dataLayer || []
-          function gtag() { dataLayer.push(arguments) }
-          gtag('js', new Date())
-          gtag('config', gaId)
-        </script>
-      </>
+    <!-- Google Tag Manager -->
+    {gtmId && (
+      <script is:inline define:vars={{ gtmId }}>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer',gtmId);
+      </script>
     )}
   </head>
   <body class="min-h-screen bg-white text-gray-900">
+    <!-- Google Tag Manager (noscript) -->
+    {gtmId && (
+      <noscript>
+        <iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+          height="0" width="0" style="display:none;visibility:hidden"></iframe>
+      </noscript>
+    )}
     <header class="border-b border-gray-200">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
