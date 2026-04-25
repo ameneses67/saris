@@ -77,6 +77,21 @@ const featuredProducts = rawFeatured.map((p) => {
 const whatsappNumber = whatsappSetting[0]?.value ?? ''
 const siteName = siteNameSetting[0]?.value ?? 'Saris'
 
+// Mapeo de imágenes locales para categorías (debe estar en el frontmatter por los generics de TS)
+const categoryImages: Record<string, string> = {
+  'belleza': '/images/categories/belleza.png',
+  'joyeria': '/images/categories/joyeria.png',
+  'ropa': '/images/categories/ropa.png',
+}
+
+// Mapeo de imágenes para subcategorías (Curadas para mantener la estética Saris)
+const subcategoryImages: Record<string, string> = {
+  'blusas': 'https://images.unsplash.com/photo-1551163943-3f6a855d1153?q=80&w=600&auto=format&fit=crop',
+  'anillos': 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=600&auto=format&fit=crop',
+  'pantalones': 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop',
+  'vestidos': 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop',
+}
+
 const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
 
 function formatPrice(centavos: number) {
@@ -85,85 +100,138 @@ function formatPrice(centavos: number) {
 ---
 
 <Layout title="Saris" description="Tienda de ropa Saris — Descubre nuestras colecciones">
-  {allCategories.length === 0 ? (
-    <!-- Homepage vacío — sin categorías -->
-    <div class="py-24 text-center">
-      <h1 class="text-5xl font-bold text-terracotta mb-6">Bienvenido a {siteName}</h1>
-      <p class="text-espresso/60 mb-10 max-w-md mx-auto text-lg">Descubre colecciones curadas pensando en tu hogar y estilo diario.</p>
-      <a href="/catalogo" class="btn-primary">
-        Ver catálogo
-      </a>
-    </div>
-  ) : (
-    <div class="space-y-20 py-8">
-
-      {/* Sección de categorías */}
-      {allCategories.map((category) => {
-        const subs = allSubcategories.filter((s) => s.categoryId === category.id)
-        return (
-          <section class="space-y-10">
-            {/* Hero de categoría */}
-            <a
-              href={`/catalogo?category=${category.id}`}
-              class="group block relative overflow-hidden rounded-[2.5rem] mb-10 h-64 sm:h-96 bg-espresso"
-            >
-              {category.photoKey ? (
-                <img
-                  src={`/api/media/${category.photoKey}`}
-                  alt={category.name}
-                  class="absolute inset-0 h-full w-full object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
-                />
-              ) : (
-                <div class="absolute inset-0 bg-gradient-to-br from-terracotta/40 to-espresso/80" />
-              )}
-              <div class="relative h-full flex flex-col justify-end p-8 sm:p-12">
-                <h2 class="text-4xl sm:text-5xl font-bold text-white mb-3">{category.name}</h2>
-                {category.description && (
-                  <p class="text-lg text-white/90 max-w-lg font-light leading-relaxed">{category.description}</p>
-                )}
-                <div class="mt-6 inline-flex items-center gap-2 text-sm font-semibold tracking-wider uppercase text-white/90 group-hover:text-white transition-colors">
-                  <span>Explorar colección</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </div>
-              </div>
+  <div class="space-y-24 py-4">
+    
+    {/* Hero Section - Propuesta de Valor */}
+    <section class="relative overflow-hidden rounded-[3rem] bg-linen">
+      <div class="grid grid-cols-1 lg:grid-cols-2 items-center min-h-[600px]">
+        {/* Lado del Texto */}
+        <div class="relative z-10 p-8 sm:p-16 lg:p-24 space-y-8 order-2 lg:order-1">
+          <div class="space-y-4">
+            <p class="text-terracotta font-bold tracking-[0.3em] uppercase text-xs">Un Ritual de Amor Propio</p>
+            <h1 class="text-5xl sm:text-7xl font-brand font-bold text-espresso leading-tight">Tu mejor versión, cada día</h1>
+            <p class="text-lg sm:text-xl text-espresso/70 font-light leading-relaxed max-w-md">
+              Celebramos tu esencia con piezas que realzan tu belleza natural. Porque arreglarse es un acto de amor propio, y tú mereces lo mejor.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-4 pt-4">
+            <a href="/catalogo" class="btn-primary px-10 py-4 text-lg">
+              Descubrir mi estilo
             </a>
+            <a href="#productos-destacados" class="inline-flex items-center justify-center rounded-2xl border border-terracotta/20 px-10 py-4 text-lg font-medium text-terracotta hover:bg-terracotta/5 transition-all">
+              Ver novedades
+            </a>
+          </div>
+        </div>
 
-            {/* Grid de subcategorías */}
-            {subs.length > 0 && (
-              <div class={`grid gap-4 ${subs.length === 1 ? 'grid-cols-1 max-w-sm' : subs.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'}`}>
-                {subs.map((sub) => (
-                  <a
-                    href={`/catalogo?subcategory=${sub.id}`}
-                    class="group relative overflow-hidden rounded-3xl bg-white border border-terracotta/5 aspect-[4/5] flex flex-col justify-end transition-all duration-500 hover:shadow-lg hover:shadow-terracotta/5"
-                  >
-                    {sub.photoKey ? (
-                      <img
-                        src={`/api/media/${sub.photoKey}`}
-                        alt={sub.name}
-                        class="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div class="absolute inset-0 bg-sage/10" />
-                    )}
-                    <div class="relative p-5 bg-gradient-to-t from-espresso/80 via-espresso/20 to-transparent">
-                      <p class="text-lg font-brand font-semibold text-white leading-tight">{sub.name}</p>
-                      {sub.description && (
-                        <p class="text-xs text-white/80 mt-1 line-clamp-2 italic">{sub.description}</p>
-                      )}
+        {/* Lado de la Imagen */}
+        <div class="relative h-[400px] lg:h-full w-full order-1 lg:order-2 overflow-hidden">
+          <img
+            src="/images/hero-lifestyle.png"
+            alt="Estilo de vida Saris"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-r from-linen lg:via-linen/20 to-transparent pointer-events-none"></div>
+        </div>
+      </div>
+    </section>
+
+    {allCategories.length === 0 ? (
+      <!-- Homepage vacío — sin categorías -->
+      <div class="py-24 text-center">
+        <h1 class="text-5xl font-bold text-terracotta mb-6">Bienvenido a {siteName}</h1>
+        <p class="text-espresso/60 mb-10 max-w-md mx-auto text-lg">Descubre colecciones curadas pensando en tu hogar y estilo diario.</p>
+        <a href="/catalogo" class="btn-primary">
+          Ver catálogo
+        </a>
+      </div>
+    ) : (
+      <div class="space-y-32">
+
+      {/* Sección de Colecciones Principales */}
+      <section class="space-y-12">
+        <div class="text-center space-y-4">
+          <h2 class="text-4xl sm:text-5xl font-brand font-bold text-espresso">Nuestras Colecciones</h2>
+          <p class="text-espresso/60 max-w-2xl mx-auto">Selecciones exclusivas diseñadas para realzar cada faceta de tu estilo personal.</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-8">
+          {allCategories.map((category) => {
+            const displayImage = categoryImages[category.slug] || (category.photoKey ? `/api/media/${category.photoKey}` : null)
+
+            return (
+              <a
+                href={`/catalogo?category=${category.id}`}
+                class="group relative w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.33%-1.5rem)] aspect-[3/4] overflow-hidden rounded-[2.5rem] bg-linen shadow-sm transition-all duration-700 hover:shadow-xl hover:-translate-y-2"
+              >
+                {displayImage ? (
+                  <img
+                    src={displayImage}
+                    alt={category.name}
+                    class="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  />
+                ) : (
+                  <div class="absolute inset-0 bg-gradient-to-br from-terracotta/10 to-espresso/5" />
+                )}
+                
+                {/* Overlay Gradiente */}
+                <div class="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                
+                {/* Contenido de la Tarjeta */}
+                <div class="absolute inset-0 p-8 flex flex-col justify-end items-center text-center space-y-3">
+                  <h3 class="text-3xl font-brand font-bold text-white tracking-tight">{category.name}</h3>
+                  <div class="w-12 h-0.5 bg-terracotta transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                  <span class="text-xs font-bold uppercase tracking-[0.2em] text-white/90 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                    Ver colección
+                  </span>
+                </div>
+              </a>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Sección de Subcategorías (Explora por Estilo) */}
+      <section class="space-y-12">
+        <div class="flex items-end justify-between border-b border-terracotta/10 pb-6">
+          <h2 class="text-3xl font-brand font-bold text-espresso">Explora por Estilo</h2>
+          <p class="text-terracotta font-medium hidden sm:block">Encuentra exactamente lo que buscas</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-x-8 gap-y-10">
+          {allSubcategories.map((sub) => {
+            const displaySubImage = subcategoryImages[sub.slug] || (sub.photoKey ? `/api/media/${sub.photoKey}` : null)
+            return (
+              <a
+                href={`/catalogo?subcategory=${sub.id}`}
+                class="group flex flex-col items-center space-y-4 text-center w-32 sm:w-40"
+              >
+                <div class="relative w-full aspect-square overflow-hidden rounded-full border-4 border-white shadow-sm ring-1 ring-terracotta/5 transition-all duration-500 group-hover:ring-terracotta/20 group-hover:shadow-md">
+                  {displaySubImage ? (
+                    <img
+                      src={displaySubImage}
+                      alt={sub.name}
+                      class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div class="h-full w-full bg-linen flex items-center justify-center">
+                      <span class="text-3xl font-brand text-terracotta/20">{sub.name[0]}</span>
                     </div>
-                  </a>
-                ))}
-              </div>
-            )}
-          </section>
-        )
-      })}
+                  )}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-espresso group-hover:text-terracotta transition-colors">{sub.name}</p>
+                  <p class="text-[10px] uppercase tracking-widest text-espresso/40">Selección Saris</p>
+                </div>
+              </a>
+            )
+          })}
+        </div>
+      </section>
 
       {/* Sección de productos destacados */}
       {featuredProducts.length > 0 && (
-        <section class="pt-10">
+        <section id="productos-destacados" class="pt-10 scroll-mt-24">
           <div class="flex items-end justify-between mb-10">
             <div>
               <h2 class="text-4xl font-bold text-terracotta mb-2">Selección Especial</h2>
