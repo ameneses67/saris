@@ -13,6 +13,7 @@ const [
   rawFeatured,
   activeDiscounts,
   whatsappSetting,
+  siteNameSetting,
 ] = await Promise.all([
   db
     .select({
@@ -60,6 +61,8 @@ const [
   db.select().from(discounts).where(eq(discounts.active, true)),
 
   db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'whatsapp_number')).limit(1),
+
+  db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'site_name')).limit(1),
 ])
 
 const featuredProducts = rawFeatured.map((p) => {
@@ -72,6 +75,7 @@ const featuredProducts = rawFeatured.map((p) => {
 })
 
 const whatsappNumber = whatsappSetting[0]?.value ?? ''
+const siteName = siteNameSetting[0]?.value ?? 'Saris'
 
 const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
 
@@ -84,9 +88,9 @@ function formatPrice(centavos: number) {
   {allCategories.length === 0 ? (
     <!-- Homepage vacío — sin categorías -->
     <div class="py-24 text-center">
-      <h1 class="text-3xl font-bold text-gray-900 mb-4">Bienvenido a Saris</h1>
-      <p class="text-gray-500 mb-8">Próximamente nuestras colecciones estarán disponibles.</p>
-      <a href="/catalogo" class="inline-flex rounded-lg bg-gray-900 px-6 py-3 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
+      <h1 class="text-5xl font-bold text-terracotta mb-6">Bienvenido a {siteName}</h1>
+      <p class="text-espresso/60 mb-10 max-w-md mx-auto text-lg">Descubre colecciones curadas pensando en tu hogar y estilo diario.</p>
+      <a href="/catalogo" class="btn-primary">
         Ver catálogo
       </a>
     </div>
@@ -97,32 +101,32 @@ function formatPrice(centavos: number) {
       {allCategories.map((category) => {
         const subs = allSubcategories.filter((s) => s.categoryId === category.id)
         return (
-          <section>
+          <section class="space-y-10">
             {/* Hero de categoría */}
             <a
               href={`/catalogo?category=${category.id}`}
-              class="group block relative overflow-hidden rounded-2xl mb-6 h-56 sm:h-72 bg-gray-900"
+              class="group block relative overflow-hidden rounded-[2.5rem] mb-10 h-64 sm:h-96 bg-espresso"
             >
               {category.photoKey ? (
                 <img
                   src={`/api/media/${category.photoKey}`}
                   alt={category.name}
-                  class="absolute inset-0 h-full w-full object-cover opacity-60 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500"
+                  class="absolute inset-0 h-full w-full object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
                 />
               ) : (
-                <div class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900" />
+                <div class="absolute inset-0 bg-gradient-to-br from-terracotta/40 to-espresso/80" />
               )}
-              <div class="relative h-full flex flex-col justify-end p-6 sm:p-8">
-                <h2 class="text-2xl sm:text-3xl font-bold text-white mb-1 break-words">{category.name}</h2>
+              <div class="relative h-full flex flex-col justify-end p-8 sm:p-12">
+                <h2 class="text-4xl sm:text-5xl font-bold text-white mb-3">{category.name}</h2>
                 {category.description && (
-                  <p class="text-sm text-white/80 max-w-lg">{category.description}</p>
+                  <p class="text-lg text-white/90 max-w-lg font-light leading-relaxed">{category.description}</p>
                 )}
-                <span class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/90 group-hover:text-white transition-colors">
-                  Ver todo
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                <div class="mt-6 inline-flex items-center gap-2 text-sm font-semibold tracking-wider uppercase text-white/90 group-hover:text-white transition-colors">
+                  <span>Explorar colección</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
-                </span>
+                </div>
               </div>
             </a>
 
@@ -132,21 +136,21 @@ function formatPrice(centavos: number) {
                 {subs.map((sub) => (
                   <a
                     href={`/catalogo?subcategory=${sub.id}`}
-                    class="group relative overflow-hidden rounded-xl bg-gray-100 aspect-square flex flex-col justify-end hover:shadow-md transition-shadow"
+                    class="group relative overflow-hidden rounded-3xl bg-white border border-terracotta/5 aspect-[4/5] flex flex-col justify-end transition-all duration-500 hover:shadow-lg hover:shadow-terracotta/5"
                   >
                     {sub.photoKey ? (
                       <img
                         src={`/api/media/${sub.photoKey}`}
                         alt={sub.name}
-                        class="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        class="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
-                      <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
+                      <div class="absolute inset-0 bg-sage/10" />
                     )}
-                    <div class="relative bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4">
-                      <p class="text-sm font-semibold text-white leading-tight break-words">{sub.name}</p>
+                    <div class="relative p-5 bg-gradient-to-t from-espresso/80 via-espresso/20 to-transparent">
+                      <p class="text-lg font-brand font-semibold text-white leading-tight">{sub.name}</p>
                       {sub.description && (
-                        <p class="text-xs text-white/75 mt-0.5 line-clamp-2 break-words">{sub.description}</p>
+                        <p class="text-xs text-white/80 mt-1 line-clamp-2 italic">{sub.description}</p>
                       )}
                     </div>
                   </a>
@@ -159,45 +163,51 @@ function formatPrice(centavos: number) {
 
       {/* Sección de productos destacados */}
       {featuredProducts.length > 0 && (
-        <section>
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Productos destacados</h2>
-            <a href="/catalogo" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-              Ver catálogo completo →
+        <section class="pt-10">
+          <div class="flex items-end justify-between mb-10">
+            <div>
+              <h2 class="text-4xl font-bold text-terracotta mb-2">Selección Especial</h2>
+              <p class="text-espresso/60 font-medium">Nuestras piezas favoritas de la temporada</p>
+            </div>
+            <a href="/catalogo" class="group flex items-center gap-2 text-sm font-semibold text-terracotta hover:text-terracotta-dark transition-colors">
+              Ver todo el catálogo
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </a>
           </div>
           <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {featuredProducts.map((product) => (
               <a
                 href={`/p/${product.slug}`}
-                class="group rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-md transition-shadow"
+                class="card-premium group"
               >
-                <div class="aspect-square bg-gray-100 overflow-hidden">
+                <div class="aspect-[3/4] bg-linen overflow-hidden">
                   {product.mainPhotoKey ? (
                     <img
                       src={`/api/media/${product.mainPhotoKey}`}
                       alt={product.name}
-                      class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   ) : (
                     <div class="h-full w-full flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-terracotta/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
                   )}
                 </div>
-                <div class="p-3">
-                  <p class="text-xs text-gray-400 mb-0.5">{product.brandName}</p>
-                  <p class="text-sm font-medium text-gray-900 leading-tight line-clamp-2 break-words">{product.name}</p>
-                  <div class="mt-1.5">
+                <div class="p-6">
+                  <p class="text-[10px] uppercase tracking-widest text-terracotta/60 font-bold mb-1">{product.brandName}</p>
+                  <p class="text-lg font-brand font-semibold text-espresso leading-tight group-hover:text-terracotta transition-colors line-clamp-1">{product.name}</p>
+                  <div class="mt-3 flex items-baseline gap-2">
                     {product.discountedPrice !== null ? (
                       <>
-                        <span class="text-xs text-gray-400 line-through mr-1">{formatPrice(product.basePrice)}</span>
-                        <span class="text-sm font-semibold text-green-700">{formatPrice(product.discountedPrice)}</span>
+                        <span class="text-lg font-bold text-terracotta">{formatPrice(product.discountedPrice)}</span>
+                        <span class="text-xs text-espresso/40 line-through">{formatPrice(product.basePrice)}</span>
                       </>
                     ) : (
-                      <span class="text-sm font-semibold text-gray-900">{formatPrice(product.basePrice)}</span>
+                      <span class="text-lg font-bold text-espresso">{formatPrice(product.basePrice)}</span>
                     )}
                   </div>
                 </div>
@@ -211,12 +221,12 @@ function formatPrice(centavos: number) {
                 href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                class="btn-primary gap-3 px-10 py-4 text-lg"
               >
-                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
-                Contáctanos por WhatsApp
+                Personaliza tu pedido por WhatsApp
               </a>
             </div>
           )}

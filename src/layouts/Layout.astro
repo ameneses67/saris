@@ -43,6 +43,11 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
     <link rel="icon" href="/favicon.ico" />
     <title>{pageTitle}</title>
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={siteName} />
@@ -65,7 +70,7 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
       </script>
     )}
   </head>
-  <body class="min-h-screen bg-white text-gray-900">
+  <body class="min-h-screen bg-linen text-espresso font-body antialiased">
     <!-- Google Tag Manager (noscript) -->
     {gtmId && (
       <noscript>
@@ -73,14 +78,14 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
           height="0" width="0" style="display:none;visibility:hidden"></iframe>
       </noscript>
     )}
-    <header class="border-b border-gray-200">
+    <header class="bg-linen/80 backdrop-blur-md sticky top-0 z-50 border-b border-terracotta/10">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="flex h-16 items-center justify-between">
-          <a href="/" class="text-xl font-bold tracking-tight">{siteName}</a>
-          <nav class="flex items-center gap-4 text-sm">
-            <a href="/catalogo" class="text-gray-600 hover:text-gray-900 transition-colors">Catálogo</a>
+        <div class="flex h-20 items-center justify-between">
+          <a href="/" class="text-3xl font-brand font-bold tracking-tight text-terracotta">{siteName}</a>
+          <nav class="flex items-center gap-8 text-sm font-medium">
+            <a href="/catalogo" class="text-espresso/70 hover:text-terracotta transition-colors">Catálogo</a>
             {session && (
-              <a href="/admin" class="text-gray-600 hover:text-gray-900 transition-colors">Admin</a>
+              <a href="/admin" class="text-espresso/70 hover:text-terracotta transition-colors">Admin</a>
             )}
           </nav>
         </div>

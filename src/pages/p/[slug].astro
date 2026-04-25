@@ -109,8 +109,8 @@ const jsonLd = {
   </Fragment>
 
   {/* Breadcrumb */}
-  <nav class="mb-6 flex items-center gap-2 text-sm text-gray-400">
-    <a href="/" class="hover:text-gray-700 transition-colors">Catálogo</a>
+  <nav class="mb-10 flex items-center gap-2 text-xs font-medium tracking-widest uppercase text-terracotta/40">
+    <a href="/" class="hover:text-terracotta transition-colors">Inicio</a>
     {product.categoryName && (
       <>
         <span>/</span>
@@ -127,11 +127,11 @@ const jsonLd = {
 
   <div class="mx-auto max-w-5xl">
     {/* Nombre y marca */}
-    <div class="mb-6">
+    <div class="mb-10">
       {product.brandName && (
-        <p class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-400">{product.brandName}</p>
+        <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-terracotta/60">{product.brandName}</p>
       )}
-      <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl break-words">{product.name}</h1>
+      <h1 class="text-4xl sm:text-5xl font-bold text-espresso leading-tight">{product.name}</h1>
     </div>
 
     {/* Galería interactiva + variantes + precio + WhatsApp */}
@@ -147,9 +147,9 @@ const jsonLd = {
 
     {/* Descripción */}
     {product.description && (
-      <div class="mt-10 border-t border-gray-100 pt-8">
-        <h2 class="mb-3 text-base font-semibold text-gray-900">Descripción</h2>
-        <p class="whitespace-pre-line break-words text-sm leading-relaxed text-gray-600">{product.description}</p>
+      <div class="mt-16 border-t border-terracotta/10 pt-10">
+        <h2 class="mb-6 text-2xl font-bold text-espresso">Detalles del Producto</h2>
+        <p class="whitespace-pre-line break-words text-lg leading-relaxed text-espresso/70 font-light">{product.description}</p>
       </div>
     )}
   </div>

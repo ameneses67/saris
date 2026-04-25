@@ -1,1 +1,64 @@
 @import "tailwindcss";
+
+@theme {
+  --color-linen: #FDFBF7;
+  --color-terracotta: #A66E5E;
+  --color-terracotta-dark: #8C5B4E;
+  --color-espresso: #2D2424;
+  --color-sage: #8C9A86;
+  
+  --font-brand: "Cormorant Garamond", serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 3rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Estilos Base */
+body {
+  background-color: var(--color-linen);
+  color: var(--color-espresso);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-brand);
+}
+
+/* Componentes */
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background-color: var(--color-terracotta);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-terracotta-dark);
+  box-shadow: var(--shadow-md);
+}
+
+@utility card-premium {
+  background-color: white;
+  border-radius: var(--radius-4xl);
+  border: 1px solid #EBE5DE;
+  overflow: hidden;
+  transition: all 0.5s;
+}
+
+.card-premium:hover {
+  box-shadow: var(--shadow-xl);
+}
