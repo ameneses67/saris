@@ -25,5 +25,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
+  // Agent discovery: Link headers on homepage (RFC 8288 / RFC 9727)
+  if (pathname === '/') {
+    const response = await next()
+    response.headers.append('Link', '</sitemap.xml>; rel="describedby"; type="application/xml"')
+    response.headers.append('Link', '</robots.txt>; rel="describedby"; type="text/plain"')
+    return response
+  }
+
   return next()
 })

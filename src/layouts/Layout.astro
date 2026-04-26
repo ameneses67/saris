@@ -31,6 +31,13 @@ const whatsappNumber = siteSettings.find((s) => s.key === 'whatsapp_number')?.va
 
 const canonical = ogUrl ?? Astro.url.href
 const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
+
+// Imagen OG por defecto si no se provee una
+const defaultOgImage = '/images/hero-lifestyle.png'
+const rawOgImage = ogImage || defaultOgImage
+const resolvedOgImage = rawOgImage.startsWith('http') 
+  ? rawOgImage 
+  : new URL(rawOgImage, Astro.url.origin).href
 ---
 
 <!doctype html>
@@ -54,7 +61,7 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:image" content={resolvedOgImage} />
 
     <!-- Slot para meta tags adicionales (ej. JSON-LD, og:type=product) -->
     <slot name="head" />

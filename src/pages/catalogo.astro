@@ -71,6 +71,7 @@ const [
       brandName: brands.name,
       basePrice: products.basePrice,
       mainPhotoKey: productPhotos.r2Key,
+      mainThumbKey: productPhotos.thumbKey,
     })
     .from(products)
     .leftJoin(brands, eq(products.brandId, brands.id))
@@ -78,8 +79,8 @@ const [
     .where(and(...conditions))
     .orderBy(desc(products.createdAt))
     .limit(LIMIT + 1),
-  db.select({ id: categories.id, name: categories.name }).from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
-  db.select({ id: subcategories.id, categoryId: subcategories.categoryId, name: subcategories.name }).from(subcategories).orderBy(asc(subcategories.name)),
+  db.select({ id: categories.id, name: categories.name, photoKey: categories.photoKey, description: categories.description }).from(categories).orderBy(asc(categories.sortOrder), asc(categories.name)),
+  db.select({ id: subcategories.id, categoryId: subcategories.categoryId, name: subcategories.name, description: subcategories.description }).from(subcategories).orderBy(asc(subcategories.name)),
   db.select({ id: brands.id, name: brands.name }).from(brands).orderBy(asc(brands.sortOrder), asc(brands.name)),
   db.select({ color: productVariants.color, size: productVariants.size })
     .from(productVariants)
@@ -103,18 +104,33 @@ const initialProducts = pageRows.map((p) => {
 const colorOptions = [...new Set(variantSummaries.filter((v) => v.color).map((v) => v.color!))].sort()
 const sizeOptions  = [...new Set(variantSummaries.filter((v) => v.size).map((v) => v.size!))].sort()
 
+const currentCategory = allCategories.find((c) => c.id === initialFilters.category)
+const currentSubcategory = allSubcategories.find((s) => s.id === initialFilters.subcategory)
+
+const pageTitle = currentSubcategory 
+  ? `${currentSubcategory.name} en ${currentCategory?.name || 'Catálogo'}`
+  : currentCategory 
+    ? currentCategory.name 
+    : 'Catálogo de Productos'
+
+const pageDesc = currentSubcategory?.description || currentCategory?.description || "Explora nuestra colección curada de productos Saris. Calidad y diseño para tu día a día."
+
+const pageOgImage = currentCategory?.photoKey 
+  ? `/api/media/${currentCategory.photoKey}` 
+  : undefined
+
 const whatsappNumber = whatsappSetting[0]?.value ?? ''
 const siteUrl = new URL(Astro.request.url).origin
 ---
 
-<Layout title="Catálogo" description="Catálogo de productos Saris">
+<Layout title={pageTitle} description={pageDesc} ogImage={pageOgImage}>
   <Catalog
     client:load
     initialProducts={initialProducts}
     initialHasMore={hasMore}
     initialFilters={initialFilters}
-    categories={allCategories}
-    subcategories={allSubcategories}
+    categories={allCategories.map(({ id, name }) => ({ id, name }))}
+    subcategories={allSubcategories.map(({ id, categoryId, name }) => ({ id, categoryId, name }))}
     brands={allBrands}
     colorOptions={colorOptions}
     sizeOptions={sizeOptions}
