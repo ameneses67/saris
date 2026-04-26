@@ -375,7 +375,7 @@ function getCategoryWidth(count: number) {
                     {/* Botón rápido (Overlay) */}
                     <div class="absolute inset-0 bg-espresso/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                       <a 
-                        href={`/producto/${product.slug}`}
+                        href={`/p/${product.slug}`}
                         class="w-full bg-white/95 backdrop-blur-sm text-espresso text-[10px] font-bold py-3.5 rounded-2xl text-center uppercase tracking-widest hover:bg-white transition-all shadow-xl translate-y-4 group-hover:translate-y-0 duration-500"
                       >
                         Ver detalles
@@ -387,7 +387,7 @@ function getCategoryWidth(count: number) {
                   <div class="space-y-1 px-1 text-center sm:text-left">
                     <p class="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">{product.brandName || 'Saris Collection'}</p>
                     <h3 class="text-xl font-brand font-bold text-espresso group-hover:text-terracotta transition-colors leading-tight">
-                      <a href={`/producto/${product.slug}`}>{product.name}</a>
+                      <a href={`/p/${product.slug}`}>{product.name}</a>
                     </h3>
                     <div class="flex items-center justify-center sm:justify-start gap-3">
                       {hasDiscount ? (
