@@ -12,8 +12,8 @@ interface Discount {
   value: number
   scope: DiscountScope
   scopeValue: string | null
-  startDate: number | null
-  endDate: number | null
+  startDate: string | number | null
+  endDate: string | number | null
   active: boolean
   createdAt: number
 }
@@ -35,9 +35,12 @@ interface Props {
 
 function getDiscountStatus(d: Discount): { label: string; color: string } {
   const now = Date.now()
+  const start = d.startDate ? new Date(d.startDate).getTime() : null
+  const end = d.endDate ? new Date(d.endDate).getTime() : null
+
   if (!d.active) return { label: 'Desactivado', color: 'text-gray-400 bg-gray-100' }
-  if (d.startDate && d.startDate > now) return { label: 'Programado', color: 'text-blue-700 bg-blue-50' }
-  if (d.endDate && d.endDate + 86_400_000 <= now) return { label: 'Expirado', color: 'text-orange-700 bg-orange-50' }
+  if (start && start > now) return { label: 'Programado', color: 'text-blue-700 bg-blue-50' }
+  if (end && end + 86_400_000 <= now) return { label: 'Expirado', color: 'text-orange-700 bg-orange-50' }
   return { label: 'Activo', color: 'text-green-700 bg-green-50' }
 }
 
@@ -46,12 +49,12 @@ function formatValue(type: DiscountType, value: number): string {
   return `$${(value / 100).toFixed(2)}`
 }
 
-function formatDate(ts: number | null): string {
+function formatDate(ts: string | number | null): string {
   if (!ts) return '—'
   return new Date(ts).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
 }
 
-function toInputDate(ts: number | null): string {
+function toInputDate(ts: string | number | null): string {
   if (!ts) return ''
   return new Date(ts).toISOString().slice(0, 10)
 }

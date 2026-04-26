@@ -92,10 +92,21 @@ const subcategoryImages: Record<string, string> = {
   'vestidos': 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop',
 }
 
-const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
+const MXN = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 })
 
 function formatPrice(centavos: number) {
   return MXN.format(centavos / 100)
+}
+// Lógica dinámica para el número de columnas de subcategorías
+const subCount = allSubcategories.length;
+const gridColsSm = subCount >= 4 ? 'sm:grid-cols-4' : `sm:grid-cols-${subCount}`;
+const gridColsLg = subCount >= 6 ? 'lg:grid-cols-6' : `lg:grid-cols-${subCount}`;
+
+function getCategoryWidth(count: number) {
+  if (count === 1) return 'lg:w-full';
+  if (count === 2) return 'lg:w-[calc(50%-1rem)]';
+  if (count === 3) return 'lg:w-[calc(33.33%-1.5rem)]';
+  return 'lg:w-[calc(25%-1.5rem)]';
 }
 ---
 
@@ -114,11 +125,11 @@ function formatPrice(centavos: number) {
               Celebramos tu esencia con piezas que realzan tu belleza natural. Porque arreglarse es un acto de amor propio, y tú mereces lo mejor.
             </p>
           </div>
-          <div class="flex flex-wrap gap-4 pt-4">
-            <a href="/catalogo" class="btn-primary px-10 py-4 text-lg">
+          <div class="flex flex-col gap-4 pt-4">
+            <a href="/catalogo" class="btn-primary px-10 py-4 text-lg w-full sm:w-72">
               Descubrir mi estilo
             </a>
-            <a href="#productos-destacados" class="inline-flex items-center justify-center rounded-2xl border border-terracotta/20 px-10 py-4 text-lg font-medium text-terracotta hover:bg-terracotta/5 transition-all">
+            <a href="#productos-destacados" class="inline-flex items-center justify-center rounded-2xl border border-terracotta/20 px-10 py-4 text-lg font-medium text-terracotta hover:bg-terracotta/5 transition-all w-full sm:w-72">
               Ver novedades
             </a>
           </div>
@@ -137,8 +148,8 @@ function formatPrice(centavos: number) {
     </section>
 
     {allCategories.length === 0 ? (
-      <!-- Homepage vacío — sin categorías -->
       <div class="py-24 text-center">
+        {/* Homepage vacío — sin categorías */}
         <h1 class="text-5xl font-bold text-terracotta mb-6">Bienvenido a {siteName}</h1>
         <p class="text-espresso/60 mb-10 max-w-md mx-auto text-lg">Descubre colecciones curadas pensando en tu hogar y estilo diario.</p>
         <a href="/catalogo" class="btn-primary">
@@ -156,21 +167,16 @@ function formatPrice(centavos: number) {
         </div>
 
         <div class="flex flex-wrap justify-center gap-8">
-          {allCategories.map((category) => {
-            // Cálculo dinámico de ancho para que se ajuste a la cantidad de categorías
-            const count = allCategories.length;
-            const desktopWidth = count === 1 ? 'lg:w-full' : 
-                                count === 2 ? 'lg:w-[calc(50%-1rem)]' : 
-                                count === 3 ? 'lg:w-[calc(33.33%-1.5rem)]' : 
-                                'lg:w-[calc(25%-1.5rem)]'; // Para 4 o más
-
-            const displayImage = categoryImages[category.slug] || (category.photoKey ? `/api/media/${category.photoKey}` : null)
-
-            return (
-              <a
-                href={`/catalogo?category=${category.id}`}
-                class={`group relative w-full sm:w-[calc(50%-1rem)] ${desktopWidth} aspect-[3/4] overflow-hidden rounded-[2.5rem] bg-linen shadow-sm transition-all duration-700 hover:shadow-xl hover:-translate-y-2`}
-              >
+            {allCategories.map((category) => {
+              const displayImage = categoryImages[category.slug] || (category.photoKey ? `/api/media/${category.photoKey}` : null)
+              return (
+                <a
+                  href={`/catalogo?category=${category.id}`}
+                  class:list={[
+                    'group relative w-full sm:w-[calc(50%-1rem)] aspect-[3/4] overflow-hidden rounded-[2.5rem] bg-linen shadow-sm transition-all duration-700 hover:shadow-xl hover:-translate-y-2',
+                    getCategoryWidth(allCategories.length)
+                  ]}
+                >
                 {displayImage ? (
                   <img
                     src={displayImage}
@@ -205,46 +211,77 @@ function formatPrice(centavos: number) {
           <p class="text-terracotta font-medium hidden sm:block">Encuentra exactamente lo que buscas</p>
         </div>
 
-        {/* Lógica dinámica para el número de columnas de subcategorías */}
-        {(() => {
-          const subCount = allSubcategories.length;
-          // En tablet (sm) máximo 4, en desktop (lg) máximo 6
-          const gridColsSm = subCount >= 4 ? 'sm:grid-cols-4' : `sm:grid-cols-${subCount}`;
-          const gridColsLg = subCount >= 6 ? 'lg:grid-cols-6' : `lg:grid-cols-${subCount}`;
-          
-          return (
-            <div class={`grid grid-cols-2 ${gridColsSm} ${gridColsLg} gap-x-8 gap-y-10 justify-center justify-items-center w-fit mx-auto`}>
-              {allSubcategories.map((sub) => {
-                const displaySubImage = subcategoryImages[sub.slug] || (sub.photoKey ? `/api/media/${sub.photoKey}` : null)
-                return (
-                  <a
-                    href={`/catalogo?subcategory=${sub.id}`}
-                    class="group flex flex-col items-center space-y-4 text-center max-w-[160px]"
-                  >
-                    <div class="relative w-full aspect-square overflow-hidden rounded-full border-4 border-white shadow-sm ring-1 ring-terracotta/5 transition-all duration-500 group-hover:ring-terracotta/20 group-hover:shadow-md">
-                      {displaySubImage ? (
-                        <img
-                          src={displaySubImage}
-                          alt={sub.name}
-                          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div class="h-full w-full bg-linen flex items-center justify-center">
-                          <span class="text-3xl font-brand text-terracotta/20">{sub.name[0]}</span>
-                        </div>
-                      )}
+        <div class={`grid grid-cols-2 ${gridColsSm} ${gridColsLg} gap-x-8 gap-y-10 justify-center justify-items-center w-fit mx-auto`}>
+          {allSubcategories.map((sub) => {
+            const displaySubImage = subcategoryImages[sub.slug] || (sub.photoKey ? `/api/media/${sub.photoKey}` : null)
+            return (
+              <a
+                href={`/catalogo?subcategory=${sub.id}`}
+                class="group flex flex-col items-center space-y-4 text-center max-w-[160px]"
+              >
+                <div class="relative w-full aspect-square overflow-hidden rounded-full border-4 border-white shadow-sm ring-1 ring-terracotta/5 transition-all duration-500 group-hover:ring-terracotta/20 group-hover:shadow-md">
+                  {displaySubImage ? (
+                    <img
+                      src={displaySubImage}
+                      alt={sub.name}
+                      class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div class="h-full w-full bg-linen flex items-center justify-center">
+                      <span class="text-3xl font-brand text-terracotta/20">{sub.name[0]}</span>
                     </div>
-                    <div>
-                      <p class="text-sm font-bold text-espresso group-hover:text-terracotta transition-colors">{sub.name}</p>
-                      <p class="text-[10px] uppercase tracking-widest text-espresso/40">Selección Saris</p>
-                    </div>
-                  </a>
-                )
-              })}
-            </div>
-          )
-        })()}
+                  )}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-espresso group-hover:text-terracotta transition-colors">{sub.name}</p>
+                  <p class="text-[10px] uppercase tracking-widest text-espresso/40">Selección Saris</p>
+                </div>
+              </a>
+            )
+          })}
+        </div>
       </section>
+
+      {/* Punto 5: Colección por Temporada / Lookbook (Diseño Editorial) */}
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-7 relative group overflow-hidden rounded-[3rem] aspect-[16/10] lg:aspect-auto lg:h-[600px]">
+          <img
+            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2070&auto=format&fit=crop"
+            alt="Colección de Temporada"
+            class="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+          />
+          <div class="absolute inset-0 bg-espresso/10 group-hover:bg-transparent transition-colors duration-700"></div>
+        </div>
+        
+        <div class="lg:col-span-5 space-y-8 lg:pl-12">
+          <div class="space-y-4">
+            <span class="text-terracotta font-bold tracking-[0.4em] uppercase text-[10px]">Edición Limitada</span>
+            <h2 class="text-5xl sm:text-6xl font-brand font-bold text-espresso leading-[1.1]">Esencia de <br/><span class="italic text-terracotta">Invierno</span></h2>
+            <p class="text-lg text-espresso/70 font-light leading-relaxed">
+              Nuestra nueva colección captura la calidez de los momentos compartidos. Materiales nobles, cortes atemporales y una paleta de colores inspirada en la naturaleza.
+            </p>
+          </div>
+          
+          <div class="pt-4 flex flex-col space-y-6">
+            <a href="/catalogo" class="inline-flex items-center gap-4 text-espresso group">
+              <span class="w-12 h-px bg-terracotta group-hover:w-20 transition-all duration-500"></span>
+              <span class="text-sm font-bold uppercase tracking-widest group-hover:text-terracotta transition-colors">Explorar el Lookbook</span>
+            </a>
+            
+            <div class="flex gap-8 border-t border-terracotta/10 pt-8">
+              <div class="space-y-1">
+                <p class="text-2xl font-brand font-bold text-espresso">100%</p>
+                <p class="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Lino Orgánico</p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-2xl font-brand font-bold text-espresso">Hecho</p>
+                <p class="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">Con Amor</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Punto 4: Franja de Confianza (Trust Signals) */}
       <section class="py-16 px-8 rounded-[3rem] bg-linen/50 border border-terracotta/5">
@@ -290,78 +327,184 @@ function formatPrice(centavos: number) {
         </div>
       </section>
 
-      {/* Sección de productos destacados */}
+      {/* Punto 3: Novedades o Best Sellers (Productos Destacados) */}
       {featuredProducts.length > 0 && (
-        <section id="productos-destacados" class="pt-10 scroll-mt-24">
-          <div class="flex items-end justify-between mb-10">
-            <div>
-              <h2 class="text-4xl font-bold text-terracotta mb-2">Selección Especial</h2>
-              <p class="text-espresso/60 font-medium">Nuestras piezas favoritas de la temporada</p>
+        <section id="productos-destacados" class="space-y-12">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-terracotta/10 pb-8">
+            <div class="space-y-2">
+              <h2 class="text-4xl font-brand font-bold text-espresso">Selección Especial</h2>
+              <p class="text-espresso/60">Nuestras piezas más deseadas y novedades recién llegadas.</p>
             </div>
-            <a href="/catalogo" class="group flex items-center gap-2 text-sm font-semibold text-terracotta hover:text-terracotta-dark transition-colors">
+            <a href="/catalogo" class="text-sm font-bold uppercase tracking-widest text-terracotta hover:text-espresso transition-colors flex items-center gap-2 group">
               Ver todo el catálogo
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </a>
           </div>
-          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featuredProducts.map((product) => (
-              <a
-                href={`/p/${product.slug}`}
-                class="card-premium group"
-              >
-                <div class="aspect-[3/4] bg-linen overflow-hidden">
-                  {product.mainPhotoKey ? (
-                    <img
-                      src={`/api/media/${product.mainPhotoKey}`}
-                      alt={product.name}
-                      class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div class="h-full w-full flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-terracotta/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div class="p-6">
-                  <p class="text-[10px] uppercase tracking-widest text-terracotta/60 font-bold mb-1">{product.brandName}</p>
-                  <p class="text-lg font-brand font-semibold text-espresso leading-tight group-hover:text-terracotta transition-colors line-clamp-1">{product.name}</p>
-                  <div class="mt-3 flex items-baseline gap-2">
-                    {product.discountedPrice !== null ? (
-                      <>
-                        <span class="text-lg font-bold text-terracotta">{formatPrice(product.discountedPrice)}</span>
-                        <span class="text-xs text-espresso/40 line-through">{formatPrice(product.basePrice)}</span>
-                      </>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+            {featuredProducts.map((product) => {
+              const hasDiscount = product.discountedPrice !== null;
+
+              return (
+                <div class="group flex flex-col space-y-4">
+                  {/* Imagen del Producto */}
+                  <div class="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-linen shadow-sm group-hover:shadow-md transition-shadow duration-500">
+                    {product.mainPhotoKey ? (
+                      <img
+                        src={`/api/media/${product.mainPhotoKey}`}
+                        alt={product.name}
+                        class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
                     ) : (
-                      <span class="text-lg font-bold text-espresso">{formatPrice(product.basePrice)}</span>
+                      <div class="h-full w-full bg-gradient-to-br from-linen to-terracotta/5 flex items-center justify-center">
+                        <span class="text-terracotta/20 font-brand text-4xl">{product.name[0]}</span>
+                      </div>
                     )}
+                    
+                    {/* Badges */}
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                      {hasDiscount && (
+                        <span class="bg-terracotta text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
+                          Oferta
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Botón rápido (Overlay) */}
+                    <div class="absolute inset-0 bg-espresso/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                      <a 
+                        href={`/producto/${product.slug}`}
+                        class="w-full bg-white/95 backdrop-blur-sm text-espresso text-[10px] font-bold py-3.5 rounded-2xl text-center uppercase tracking-widest hover:bg-white transition-all shadow-xl translate-y-4 group-hover:translate-y-0 duration-500"
+                      >
+                        Ver detalles
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Información del Producto */}
+                  <div class="space-y-1 px-1 text-center sm:text-left">
+                    <p class="text-[10px] uppercase tracking-widest text-espresso/40 font-bold">{product.brandName || 'Saris Collection'}</p>
+                    <h3 class="text-xl font-brand font-bold text-espresso group-hover:text-terracotta transition-colors leading-tight">
+                      <a href={`/producto/${product.slug}`}>{product.name}</a>
+                    </h3>
+                    <div class="flex items-center justify-center sm:justify-start gap-3">
+                      {hasDiscount ? (
+                        <>
+                          <span class="text-lg font-bold text-terracotta">{formatPrice(product.discountedPrice!)}</span>
+                          <span class="text-sm text-espresso/30 line-through">{formatPrice(product.basePrice)}</span>
+                        </>
+                      ) : (
+                        <span class="text-lg font-bold text-espresso/80">{formatPrice(product.basePrice)}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </a>
-            ))}
+              );
+            })}
           </div>
 
-          {whatsappNumber && (
-            <div class="mt-8 text-center">
+
+        </section>
+      )}
+
+      {/* Punto 6: Prueba Social (Social Proof) */}
+      <section class="space-y-16 py-24">
+        <div class="text-center space-y-4">
+          <h2 class="text-4xl font-brand font-bold text-espresso">Lo que dicen nuestras clientas</h2>
+          <div class="flex justify-center gap-1 text-terracotta">
+            {[...Array(5)].map(() => (
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <p class="text-espresso/60 max-w-xl mx-auto italic">"Arreglarse es un acto de amor propio, y nos encanta acompañarte en ese proceso."</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Testimonio 1 */}
+          <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-terracotta/5 space-y-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <p class="text-lg font-brand leading-relaxed text-espresso/80 italic">
+              "La calidad de las telas es excepcional. Compré una blusa de lino y se ha vuelto mi pieza favorita. Se nota la curaduría en cada detalle."
+            </p>
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-linen flex items-center justify-center font-bold text-terracotta text-sm">MG</div>
+              <div>
+                <p class="font-bold text-espresso text-sm">María García</p>
+                <p class="text-[10px] uppercase tracking-widest text-espresso/40">Compra Verificada</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonio 2 */}
+          <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-terracotta/5 space-y-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <p class="text-lg font-brand leading-relaxed text-espresso/80 italic">
+              "El servicio por WhatsApp es increíble. Me ayudaron a elegir mi talla y el envío llegó rapidísimo. Muy recomendadas."
+            </p>
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-linen flex items-center justify-center font-bold text-terracotta text-sm">CR</div>
+              <div>
+                <p class="font-bold text-espresso text-sm">Carla Rodríguez</p>
+                <p class="text-[10px] uppercase tracking-widest text-espresso/40">Compra Verificada</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonio 3 */}
+          <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-terracotta/5 space-y-6 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <p class="text-lg font-brand leading-relaxed text-espresso/80 italic">
+              "Buscaba algo elegante pero cómodo para el día a día y Saris dio en el clavo. Ya estoy esperando mi siguiente pedido."
+            </p>
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-linen flex items-center justify-center font-bold text-terracotta text-sm">LM</div>
+              <div>
+                <p class="font-bold text-espresso text-sm">Lucía Méndez</p>
+                <p class="text-[10px] uppercase tracking-widest text-espresso/40">Compra Verificada</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Punto 7: Contacto Directo / Cierre (CTA Final) */}
+      {whatsappNumber && (
+        <section class="relative overflow-hidden rounded-[3rem] bg-espresso py-20 px-8 sm:px-16 text-center text-linen shadow-2xl">
+          {/* Elementos Decorativos */}
+          <div class="absolute -top-24 -left-24 w-64 h-64 bg-terracotta/10 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-terracotta/10 rounded-full blur-3xl"></div>
+          
+          <div class="relative z-10 max-w-3xl mx-auto space-y-10">
+            <div class="space-y-4">
+              <p class="text-terracotta font-bold tracking-[0.3em] uppercase text-xs">Atención Personalizada</p>
+              <h2 class="text-4xl sm:text-6xl font-brand font-bold leading-tight">¿Necesitas ayuda con tu pedido?</h2>
+              <p class="text-lg sm:text-xl text-linen/70 font-light leading-relaxed">
+                Estamos aquí para asesorarte en tallas, colores o cualquier detalle de tu compra. Haz clic y chatea directamente con nosotros.
+              </p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
               <a
                 href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="btn-primary gap-3 px-10 py-4 text-lg"
+                class="group relative inline-flex items-center gap-4 px-12 py-5 bg-terracotta text-white rounded-2xl font-bold text-lg uppercase tracking-widest transition-all hover:bg-white hover:text-espresso shadow-xl hover:-translate-y-1 overflow-hidden"
               >
-                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
+                <svg class="h-6 w-6 relative z-10" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
-                Personaliza tu pedido por WhatsApp
+                <span class="relative z-10">Chatea con nosotros</span>
               </a>
+              <p class="text-linen/40 text-sm italic">
+                Respuesta inmediata en horario comercial
+              </p>
             </div>
-          )}
+          </div>
         </section>
       )}
-
     </div>
   )}
+  </div>
 </Layout>

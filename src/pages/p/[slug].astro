@@ -50,6 +50,46 @@ const [photos, variants, activeDiscounts, whatsappSetting] = await Promise.all([
   db.select({ value: settings.value }).from(settings).where(eq(settings.key, 'whatsapp_number')).limit(1),
 ])
 
+// Productos relacionados (misma categoría, excluyendo el actual)
+const relatedProductsRaw = await db
+  .select({
+    id: products.id,
+    name: products.name,
+    slug: products.slug,
+    basePrice: products.basePrice,
+    categoryId: products.categoryId,
+    subcategoryId: products.subcategoryId,
+    brandId: products.brandId,
+  })
+  .from(products)
+  .where(and(eq(products.categoryId, product.categoryId), eq(products.status, 'active')))
+  .limit(5)
+
+const relatedProducts = await Promise.all(
+  relatedProductsRaw
+    .filter(p => p.id !== product.id)
+    .slice(0, 4)
+    .map(async (p) => {
+      const [photo, variantRows] = await Promise.all([
+        db.select().from(productPhotos).where(eq(productPhotos.productId, p.id)).orderBy(asc(productPhotos.sortOrder)).limit(1),
+        db.select().from(productVariants).where(eq(productVariants.productId, p.id)).limit(1)
+      ])
+      
+      const v = variantRows[0]
+      const resolved = resolveDiscount(
+        { id: p.id, categoryId: p.categoryId, subcategoryId: p.subcategoryId, brandId: p.brandId, basePrice: p.basePrice },
+        { color: v?.color ?? null, size: v?.size ?? null, priceOverride: v?.priceOverride ?? null },
+        activeDiscounts,
+      )
+
+      return {
+        ...p,
+        photo: photo[0]?.r2Key,
+        discountedPrice: resolved?.finalPrice ?? null,
+      }
+    })
+)
+
 // Calcular precio con descuento para cada variante
 const variantsWithDiscount = variants.map((v) => {
   const resolved = resolveDiscount(
@@ -76,8 +116,8 @@ const ogImage = mainPhoto ? `${siteUrl}/api/media/${mainPhoto.r2Key}` : undefine
 // Precio base en pesos (para JSON-LD el schema espera el valor numérico normal)
 const baseVariant = variantsWithDiscount[0]
 const displayPrice = baseVariant
-  ? ((baseVariant.discountedPrice ?? baseVariant.price) / 100).toFixed(2)
-  : (product.basePrice / 100).toFixed(2)
+  ? ((baseVariant.discountedPrice ?? baseVariant.price) / 100).toFixed(0)
+  : (product.basePrice / 100).toFixed(0)
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -129,9 +169,9 @@ const jsonLd = {
     {/* Nombre y marca */}
     <div class="mb-10">
       {product.brandName && (
-        <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-terracotta/60">{product.brandName}</p>
+        <p class="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-terracotta/60">{product.brandName}</p>
       )}
-      <h1 class="text-4xl sm:text-5xl font-bold text-espresso leading-tight">{product.name}</h1>
+      <h1 class="text-5xl sm:text-7xl font-brand font-bold text-espresso leading-[1.1] tracking-tight">{product.name}</h1>
     </div>
 
     {/* Galería interactiva + variantes + precio + WhatsApp */}
@@ -147,9 +187,69 @@ const jsonLd = {
 
     {/* Descripción */}
     {product.description && (
-      <div class="mt-16 border-t border-terracotta/10 pt-10">
-        <h2 class="mb-6 text-2xl font-bold text-espresso">Detalles del Producto</h2>
-        <p class="whitespace-pre-line break-words text-lg leading-relaxed text-espresso/70 font-light">{product.description}</p>
+      <div class="mt-24 border-t border-terracotta/10 pt-16">
+        <div class="max-w-2xl">
+          <h2 class="mb-8 text-2xl font-brand font-bold text-espresso tracking-tight italic">Detalles del Producto</h2>
+          <p class="whitespace-pre-line break-words text-xl leading-relaxed text-espresso/60 font-light italic">
+            {product.description}
+          </p>
+        </div>
+      </div>
+    )}
+
+    {/* Productos Relacionados */}
+    {relatedProducts.length > 0 && (
+      <div class="mt-32 pt-24 border-t border-terracotta/10">
+        <div class="flex items-center justify-between mb-12">
+          <h2 class="text-3xl font-brand font-bold text-espresso">También te podría gustar</h2>
+          <a href="/catalogo" class="text-xs font-bold uppercase tracking-widest text-terracotta hover:text-espresso transition-colors">
+            Ver todo el catálogo
+          </a>
+        </div>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          {relatedProducts.map((rp) => (
+            <a href={`/p/${rp.slug}`} class="group space-y-4">
+              <div class="aspect-[4/5] overflow-hidden rounded-[2rem] bg-linen relative">
+                {rp.photo ? (
+                  <img 
+                    src={`/api/media/${rp.photo}`} 
+                    alt={rp.name} 
+                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div class="h-full w-full flex items-center justify-center text-terracotta/20">
+                    <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+                )}
+                {rp.discountedPrice && (
+                  <div class="absolute top-4 right-4 bg-terracotta text-white text-[10px] font-bold px-3 py-1 rounded-full">
+                    Oferta
+                  </div>
+                )}
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-espresso group-hover:text-terracotta transition-colors line-clamp-1">{rp.name}</h3>
+                <div class="flex items-center gap-2 mt-1">
+                  {rp.discountedPrice ? (
+                    <>
+                      <span class="text-sm font-brand font-bold text-terracotta">
+                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(rp.discountedPrice / 100)}
+                      </span>
+                      <span class="text-xs text-espresso/20 line-through">
+                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(rp.basePrice / 100)}
+                      </span>
+                    </>
+                  ) : (
+                    <span class="text-sm font-brand font-bold text-espresso/60">
+                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(rp.basePrice / 100)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     )}
   </div>

@@ -21,12 +21,13 @@ const [siteSettings, session] = await Promise.all([
   db
     .select({ key: settings.key, value: settings.value })
     .from(settings)
-    .where(inArray(settings.key, ['site_name', 'gtm_container_id'])),
+    .where(inArray(settings.key, ['site_name', 'gtm_container_id', 'whatsapp_number'])),
   getAuth().api.getSession({ headers: Astro.request.headers }).catch(() => null),
 ])
 
 const siteName = siteSettings.find((s) => s.key === 'site_name')?.value || 'Saris'
 const gtmId    = siteSettings.find((s) => s.key === 'gtm_container_id')?.value || ''
+const whatsappNumber = siteSettings.find((s) => s.key === 'whatsapp_number')?.value || ''
 
 const canonical = ogUrl ?? Astro.url.href
 const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
@@ -102,5 +103,99 @@ const pageTitle = title === siteName ? siteName : `${title} — ${siteName}`
     <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <slot />
     </main>
+
+    <footer class="bg-linen border-t border-terracotta/10 mt-24">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 sm:gap-16">
+          {/* Columna 1: Marca */}
+          <div class="space-y-6">
+            <a href="/" class="flex items-center gap-3 group">
+              <div class="w-8 h-8">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                  <path d="M30 25C30 25 70 25 70 42C70 59 30 59 30 76C30 76 70 76 70 76" stroke="#2D2424" stroke-width="8" stroke-linecap="round"/>
+                  <path d="M45 42L55 42" stroke="#A66E5E" stroke-width="8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="text-2xl font-brand font-bold tracking-tight text-espresso">{siteName}</span>
+            </a>
+            <p class="text-espresso/60 text-sm leading-relaxed max-w-xs italic">
+              "Curaduría de estilo y bienestar para tu día a día. Porque cada detalle cuenta."
+            </p>
+            <div class="flex gap-4">
+              <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-espresso hover:bg-terracotta hover:text-white transition-all shadow-sm">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.245 2.242 1.308 3.607.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.063 1.366-.333 2.633-1.308 3.608-.975.975-2.242 1.245-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.063-2.633-.333-3.608-1.308-.975-.975-1.245-2.242-1.308-3.608-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.245 3.607-1.308 1.266-.058 1.646-.07 4.85-.07zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.355 2.618 6.778 6.98 6.978 1.28.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.058-1.28.072-1.689.072-4.948 0-3.259-.014-3.668-.072-4.948-.199-4.359-2.612-6.773-6.977-6.978C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </a>
+              <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-espresso hover:bg-terracotta hover:text-white transition-all shadow-sm">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.323-1.325z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Columna 2: Navegación */}
+          <div class="space-y-6">
+            <h4 class="text-sm font-bold uppercase tracking-widest text-espresso/40">Tienda</h4>
+            <ul class="space-y-4">
+              <li><a href="/" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Inicio</a></li>
+              <li><a href="/catalogo" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Catálogo Completo</a></li>
+              <li><a href="/catalogo?category=ropa" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Rarities Ropa</a></li>
+              <li><a href="/catalogo?category=joyeria" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Colección Joyería</a></li>
+            </ul>
+          </div>
+
+          {/* Columna 3: Información */}
+          <div class="space-y-6">
+            <h4 class="text-sm font-bold uppercase tracking-widest text-espresso/40">Ayuda</h4>
+            <ul class="space-y-4">
+              <li><a href="#" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Preguntas Frecuentes</a></li>
+              <li><a href="#" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Envíos y Entregas</a></li>
+              <li><a href="#" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Términos y Condiciones</a></li>
+              <li><a href="#" class="text-espresso/70 hover:text-terracotta transition-colors text-sm font-medium">Política de Privacidad</a></li>
+            </ul>
+          </div>
+
+          {/* Columna 4: Contacto */}
+          <div class="space-y-6">
+            <h4 class="text-sm font-bold uppercase tracking-widest text-espresso/40">Contacto</h4>
+            <ul class="space-y-4">
+              {whatsappNumber && (
+                <li>
+                  <a 
+                    href={`https://wa.me/${whatsappNumber.replace(/\D/g, '')}`}
+                    target="_blank"
+                    class="flex items-center gap-3 text-espresso/70 hover:text-terracotta transition-colors group"
+                  >
+                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <svg class="w-4 h-4 text-terracotta" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    </div>
+                    <span class="text-sm font-medium">WhatsApp</span>
+                  </a>
+                </li>
+              )}
+              <li>
+                <a href="mailto:hola@saris.com" class="flex items-center gap-3 text-espresso/70 hover:text-terracotta transition-colors group">
+                  <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <svg class="w-4 h-4 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                  </div>
+                  <span class="text-sm font-medium">Email</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-16 pt-8 border-t border-terracotta/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p class="text-[10px] uppercase tracking-[0.2em] text-espresso/30">
+            &copy; {new Date().getFullYear()} {siteName}. Todos los derechos reservados.
+          </p>
+          <div class="flex items-center gap-6 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
+            {/* Iconos de métodos de pago simplificados */}
+            <div class="h-6 w-10 bg-espresso/10 rounded flex items-center justify-center text-[8px] font-bold">VISA</div>
+            <div class="h-6 w-10 bg-espresso/10 rounded flex items-center justify-center text-[8px] font-bold">MC</div>
+            <div class="h-6 w-10 bg-espresso/10 rounded flex items-center justify-center text-[8px] font-bold">AMEX</div>
+            <div class="h-6 w-10 bg-espresso/10 rounded flex items-center justify-center text-[8px] font-bold">PPAL</div>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

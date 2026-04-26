@@ -41,8 +41,8 @@ export function resolveDiscount(
 
   for (const d of activeDiscounts) {
     if (!d.active) continue
-    if (d.startDate && d.startDate.getTime() > now) continue
-    if (d.endDate && d.endDate.getTime() + 86_400_000 <= now) continue
+    if (d.startDate && new Date(d.startDate).getTime() > now) continue
+    if (d.endDate && new Date(d.endDate).getTime() + 86_400_000 <= now) continue
 
     // Verificar si el descuento aplica a este producto/variante
     const applies = (() => {
@@ -68,9 +68,12 @@ export function resolveDiscount(
 
     if (!applies) continue
 
-    const finalPrice = d.type === 'percentage'
+    let rawFinalPrice = d.type === 'percentage'
       ? Math.round(basePrice * (1 - d.value / 100))
       : Math.max(0, basePrice - d.value)
+
+    // Redondear a la decena superior en pesos (1000 centavos)
+    const finalPrice = Math.ceil(rawFinalPrice / 1000) * 1000
 
     const saving = basePrice - finalPrice
 
